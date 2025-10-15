@@ -1,19 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { 
-  LayoutDashboard, 
-  PlusCircle,
-  Package,
-  Users,
-  Tool,
-  DollarSign,
-  Receipt,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Shield
-} from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt, ChevronDown, ChevronUp, X, Shield } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean

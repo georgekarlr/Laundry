@@ -10,14 +10,7 @@ import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import PlaceholderPage from './pages/PlaceholderPage'
 import PersonaManagement from './pages/PersonaManagement'
-import { 
-  PlusCircle,
-  Package,
-  Users,
-  Tool,
-  DollarSign,
-  Receipt
-} from 'lucide-react'
+import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
 
 function App() {
   return (
