@@ -1,6 +1,6 @@
 import React from 'react'
 import { Customer } from '../../services/customerService'
-import { User, Phone, Mail } from 'lucide-react'
+import { User, Phone, Mail, ChevronRight } from 'lucide-react' // Import ChevronRight
 
 interface CustomerListProps {
   customers: Customer[]
@@ -58,6 +58,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
             onClick={() => onSelectCustomer(customer)}
           >
             <div className="flex items-center justify-between">
+              {/* Left side: Avatar, Name, Phone, Email */}
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-blue-600" />
@@ -76,9 +77,14 @@ const CustomerList: React.FC<CustomerListProps> = ({
                   )}
                 </div>
               </div>
-              {selectedCustomer?.customer_id === customer.customer_id && (
-                <span className="text-blue-600 text-sm font-medium">Selected</span>
-              )}
+              {/* Right side: Selected indicator and Chevron icon */}
+              <div className="flex items-center space-x-2"> {/* Added a div to group */}
+                {selectedCustomer?.customer_id === customer.customer_id && (
+                  <span className="text-blue-600 text-sm font-medium">Selected</span>
+                )}
+                {/* Added ChevronRight icon */}
+                <ChevronRight className="h-5 w-5 text-gray-400" />
+              </div>
             </div>
           </li>
         ))}
