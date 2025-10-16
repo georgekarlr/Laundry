@@ -1,4 +1,3 @@
-```typescript
 import React, { useEffect, useState } from 'react'
 import { Product, ProductService } from '../services/productService'
 import ProductList from '../components/services/ProductList'
