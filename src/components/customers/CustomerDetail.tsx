@@ -1,4 +1,3 @@
-```typescript
 import React, { useEffect, useState } from 'react'
 import { Customer, CreditLedgerEntry, OrderHistoryItem, CustomerService } from '../../services/customerService'
 import { User, Phone, Mail, Calendar, X, DollarSign, Package, CreditCard, History, AlertCircle } from 'lucide-react'
@@ -213,4 +212,3 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose }) =>
 }
 
 export default CustomerDetail
-```
