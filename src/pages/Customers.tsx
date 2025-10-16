@@ -42,13 +42,15 @@ const Customers: React.FC = () => {
       return customers
     }
     const lowerCaseSearchTerm = searchTerm.toLowerCase()
-    return customers.filter(customer =>
-      customer.customer_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      customer.customer_email.toLowerCase().includes(lowerCaseSearchTerm) ||
-      (customer.customer_phone_number && customer.customer_phone_number.includes(lowerCaseSearchTerm))
-      // Add other fields here if needed
-    )
-  }, [customers, searchTerm]) // Dependencies for memoization
+    return customers.filter(customer => {
+      // Add null/undefined checks before calling toLowerCase()
+      const nameMatch = customer.customer_name?.toLowerCase().includes(lowerCaseSearchTerm) ?? false;
+      const emailMatch = customer.customer_email?.toLowerCase().includes(lowerCaseSearchTerm) ?? false;
+      const phoneMatch = customer.customer_phone_number?.includes(lowerCaseSearchTerm) ?? false; // Phone number might not need .toLowerCase() if it's purely numeric or you expect exact match, but let's keep it consistent. If it's pure number, remove .toLowerCase() here.
+
+      return nameMatch || emailMatch || phoneMatch;
+    });
+  }, [customers, searchTerm]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
