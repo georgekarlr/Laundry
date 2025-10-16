@@ -88,4 +88,3 @@ const CustomerList: React.FC<CustomerListProps> = ({
 }
 
 export default CustomerList
-```
