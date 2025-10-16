@@ -12,6 +12,7 @@ import PlaceholderPage from './pages/PlaceholderPage'
 import PersonaManagement from './pages/PersonaManagement'
 import Customers from './pages/Customers'
 import Services from './pages/Services'
+import NewOrderPage from './pages/NewOrderPage'
 import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
 
 function App() {
@@ -38,11 +39,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <PlaceholderPage 
-                    title="New Order" 
-                    description="Create a new order for your customers."
-                    icon={PlusCircle}
-                  />
+                  <NewOrderPage />
                 </Layout>
               </PersonaProtectedRoute>
             </ProtectedRoute>

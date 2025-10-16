@@ -36,7 +36,6 @@ export interface ServiceResult<T> {
   message: string
 }
 
-export class CustomerService {
   static async getAllCustomers(): Promise<ServiceResult<Customer[]>> {
     try {
       const { data, error } = await supabase
@@ -96,3 +95,34 @@ export class CustomerService {
     }
   }
 }
+
+export class CustomerService {
+  static async createCustomer(
+    customer_name: string,
+    customer_phone_number: string,
+    customer_email?: string,
+    customer_preferences?: any
+  ): Promise<ServiceResult<Customer>> {
+    try {
+      const { data, error } = await supabase
+        .from('acd_customers')
+        .insert({
+          customer_name,
+          customer_phone_number,
+          customer_email: customer_email || null,
+          customer_preferences: customer_preferences || null,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating customer:', error)
+        return { success: false, message: error.message }
+      }
+
+      return { success: true, data: data as Customer, message: 'Customer created successfully' }
+    } catch (error) {
+      console.error('Network error creating customer:', error)
+      return { success: false, message: 'Network error occurred' }
+    }
+  }
