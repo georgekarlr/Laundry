@@ -1,4 +1,3 @@
-```typescript
 import React, { useEffect, useState } from 'react'
 import { Customer, CustomerService } from '../services/customerService'
 import CustomerList from '../components/customers/CustomerList'
@@ -80,4 +79,3 @@ const Customers: React.FC = () => {
 }
 
 export default Customers
-```
