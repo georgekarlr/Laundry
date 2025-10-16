@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Product, ProductService } from '../services/productService'
 import ProductList from '../components/services/ProductList'
 import ProductFormModal from '../components/services/ProductFormModal'
-import DeleteConfirmationModal from '../components/services/DeleteConfiimport { PenTool as Tool, Plus, AlertCircle, CheckCircle } from 'lucide-react''lucide-react'
+import DeleteConfirmationModal from '../components/services/DeleteConfirmationModal'
+import { PenTool as Tool, Plus, AlertCircle, CheckCircle } from 'lucide-react'
 
 const Services: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
