@@ -10,6 +10,8 @@ const Customers: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [searchTerm, setSearchTerm] = useState('') // New state for search term
+
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -35,6 +37,24 @@ const Customers: React.FC = () => {
     setSelectedCustomer(null)
   }
 
+  const filteredCustomers = useMemo(() => {
+    if (!searchTerm) {
+      return customers
+    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase()
+    return customers.filter(customer =>
+      customer.customer_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+      customer.customer_email.toLowerCase().includes(lowerCaseSearchTerm) ||
+      (customer.customer_phone_number && customer.customer_phone_number.includes(lowerCaseSearchTerm))
+      // Add other fields here if needed
+    )
+  }, [customers, searchTerm]) // Dependencies for memoization
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value)
+  }
+
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -52,14 +72,9 @@ const Customers: React.FC = () => {
           type="text"
           placeholder="Filter customers by name, email, or phone..."
           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          disabled // Placeholder for future implementation
+          value={searchTerm} // Controlled component
+          onChange={handleSearchChange} // Update searchTerm on change        
         />
-        <button
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-          disabled // Placeholder for future implementation
-        >
-          Apply Filters
-        </button>
       </div>
 
       {/* Main Content Area */}
