@@ -1,4 +1,3 @@
-```typescript
 import React, { useState, useEffect } from 'react'
 import { Product } from '../../services/productService'
 import { X, Package, DollarSign, Tag } from 'lucide-react'
