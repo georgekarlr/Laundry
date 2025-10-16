@@ -1,4 +1,3 @@
-```typescript
 import { supabase } from '../lib/supabase'
 
 export interface Customer {
@@ -97,4 +96,3 @@ export class CustomerService {
     }
   }
 }
-```
