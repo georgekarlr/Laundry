@@ -132,7 +132,7 @@ const NewOrderPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Page Header */} 
       <div className="text-center">
         <h1 className="text-2xl font-bold text-gray-900">Create New Order</h1>
         <p className="mt-1 text-sm text-gray-600">
@@ -148,15 +148,15 @@ const NewOrderPage: React.FC = () => {
         {renderCurrentStep()}
       </div>
 
-      {/* Debug Info (only in development) */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* Debug Info (only in development) {process.env.NODE_ENV === 'development' && (
         <div className="mt-8 p-4 bg-gray-100 rounded-lg">
           <h4 className="font-medium text-gray-900 mb-2">Debug Info:</h4>
           <pre className="text-xs text-gray-600 overflow-auto">
             {JSON.stringify(orderFormState, null, 2)}
           </pre>
         </div>
-      )}
+      )}*/}
+      
     </div>
   )
 }
