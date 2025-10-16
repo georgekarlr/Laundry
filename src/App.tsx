@@ -11,6 +11,7 @@ import Profile from './pages/Profile'
 import PlaceholderPage from './pages/PlaceholderPage'
 import PersonaManagement from './pages/PersonaManagement'
 import Customers from './pages/Customers'
+import Services from './pages/Services'
 import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
 
 function App() {
