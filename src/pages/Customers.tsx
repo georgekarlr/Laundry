@@ -10,8 +10,7 @@ const Customers: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [searchTerm, setSearchTerm] = useState('') // New state for search term
-
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -39,23 +38,30 @@ const Customers: React.FC = () => {
 
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) {
+      // If no search term, return all customers
       return customers
     }
-    const lowerCaseSearchTerm = searchTerm.toLowerCase()
-    return customers.filter(customer => {
-      // Add null/undefined checks before calling toLowerCase()
-      const nameMatch = customer.customer_name?.toLowerCase().includes(lowerCaseSearchTerm) ?? false;
-      const emailMatch = customer.customer_email?.toLowerCase().includes(lowerCaseSearchTerm) ?? false;
-      const phoneMatch = customer.customer_phone_number?.includes(lowerCaseSearchTerm) ?? false; // Phone number might not need .toLowerCase() if it's purely numeric or you expect exact match, but let's keep it consistent. If it's pure number, remove .toLowerCase() here.
 
-      return nameMatch || emailMatch || phoneMatch;
-    });
-  }, [customers, searchTerm]);
+    const lowerCaseSearchTerm = searchTerm.toLowerCase()
+
+    return customers.filter(customer => {
+      // Use optional chaining (?.) and nullish coalescing (?? '') for safer access
+      // Convert to string and then to lowercase, handling potential nulls/undefineds
+      const name = customer.customer_name?.toLowerCase() ?? '';
+      const email = customer.customer_email?.toLowerCase() ?? '';
+      const phone = customer.customer_phone_number?.toLowerCase() ?? ''; // Even if it's a number, toString() is implicit if it exists, but toLowerCase() needs a string. Better to ensure it's a string first if it could be a number.
+
+      return (
+        name.includes(lowerCaseSearchTerm) ||
+        email.includes(lowerCaseSearchTerm) ||
+        phone.includes(lowerCaseSearchTerm)
+      )
+    })
+  }, [customers, searchTerm])
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
   }
-
 
   return (
     <div className="space-y-6">
@@ -67,15 +73,15 @@ const Customers: React.FC = () => {
         </p>
       </div>
 
-      {/* Filter Section (Placeholder) */}
+      {/* Filter Section */}
       <div className="bg-white shadow-sm rounded-lg p-4 flex items-center space-x-3">
         <Search className="h-5 w-5 text-gray-400" />
         <input
           type="text"
           placeholder="Filter customers by name, email, or phone..."
           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={searchTerm} // Controlled component
-          onChange={handleSearchChange} // Update searchTerm on change        
+          value={searchTerm}
+          onChange={handleSearchChange}
         />
       </div>
 
@@ -84,7 +90,7 @@ const Customers: React.FC = () => {
         <CustomerDetail customer={selectedCustomer} onClose={handleCloseDetail} />
       ) : (
         <CustomerList
-          customers={customers}
+          customers={filteredCustomers}
           loading={loading}
           error={error}
           selectedCustomer={selectedCustomer}
