@@ -36,6 +36,7 @@ export interface ServiceResult<T> {
   message: string
 }
 
+export class CustomerService {
   static async getAllCustomers(): Promise<ServiceResult<Customer[]>> {
     try {
       const { data, error } = await supabase
@@ -94,9 +95,7 @@ export interface ServiceResult<T> {
       return { success: false, message: 'Network error occurred' }
     }
   }
-}
 
-export class CustomerService {
   static async createCustomer(
     customer_name: string,
     customer_phone_number: string,
@@ -126,3 +125,4 @@ export class CustomerService {
       return { success: false, message: 'Network error occurred' }
     }
   }
+}
