@@ -1,4 +1,3 @@
-```typescript
 import { supabase } from '../lib/supabase'
 
 export interface Product {
@@ -116,4 +115,3 @@ export class ProductService {
     }
   }
 }
-```
