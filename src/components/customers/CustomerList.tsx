@@ -1,4 +1,3 @@
-```typescript
 import React from 'react'
 import { Customer } from '../../services/customerService'
 import { User, Phone, Mail } from 'lucide-react'
@@ -89,4 +88,3 @@ const CustomerList: React.FC<CustomerListProps> = ({
 }
 
 export default CustomerList
-```
