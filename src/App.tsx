@@ -10,7 +10,7 @@ import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import PlaceholderPage from './pages/PlaceholderPage'
 import PersonaManagement from './pages/PersonaManagement'
-import Customers from './pages/Customers' // Import the new Customers page
+import Customers from './pages/Customers'
 import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
 
 function App() {
@@ -75,7 +75,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <PlaceholderPage 
+                  <Services
                     title="Services" 
                     description="Manage your service offerings and configurations."
                     icon={Tool}
