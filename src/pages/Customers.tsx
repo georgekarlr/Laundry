@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Customer, CustomerService } from '../services/customerService'
 import CustomerList from '../components/customers/CustomerList'
 import CustomerDetail from '../components/customers/CustomerDetail'
