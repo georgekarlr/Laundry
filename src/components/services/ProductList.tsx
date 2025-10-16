@@ -1,5 +1,6 @@
 import React from 'react'
-import { Product } from '../../services/primport { CreditCard as Edit, Trash2, Package, DollarSign } from 'lucide-react''lucide-react'
+import { Product } from '../../services/productService'
+import { Edit, Trash2, Package, DollarSign } from 'lucide-react'
 
 interface ProductListProps {
   products: Product[]
