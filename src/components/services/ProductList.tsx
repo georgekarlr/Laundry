@@ -1,4 +1,3 @@
-```typescript
 import React from 'react'
 import { Product } from '../../services/primport { CreditCard as Edit, Trash2, Package, DollarSign } from 'lucide-react''lucide-react'
 
@@ -102,4 +101,3 @@ const ProductList: React.FC<ProductListProps> = ({
 }
 
 export default ProductList
-```
