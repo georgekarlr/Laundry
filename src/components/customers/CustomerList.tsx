@@ -52,7 +52,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
         {customers.map((customer) => (
           <li
             key={customer.customer_id}
-            className={\`p-4 hover:bg-gray-50 cursor-pointer ${
+            className={`p-4 hover:bg-gray-50 cursor-pointer ${
               selectedCustomer?.customer_id === customer.customer_id ? 'bg-blue-50' : ''
             }`}
             onClick={() => onSelectCustomer(customer)}
