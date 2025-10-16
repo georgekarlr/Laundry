@@ -1,4 +1,3 @@
-```typescript
 import React from 'react'
 import { Product } from '../../services/productService'
 import { Edit, Trash2, Package, DollarSign } from 'lucide-react'
