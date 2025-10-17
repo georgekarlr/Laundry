@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Product, ProductService } from '../../services/productService'
 import { OrderItem, GarmentData } from '../../types/order'
-import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle, Edit, X } from 'lucide-react'
-
-interface AddServicesStepProps {
+import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle, CreditCard a,sEdit, X  Edit, X } from 'lucide-react'ce AddServicesStepProps {
   onNext: () => void
   onPrevious: () => void
   onAddOrderItem: (item: OrderItem) => void
@@ -323,7 +321,7 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                           </div>
                         </div>
                       )}
-                    </div> 
+                    </div>
                   ))}
                 </div>
                 <div className="border-t border-gray-200 p-4 bg-gray-50">
