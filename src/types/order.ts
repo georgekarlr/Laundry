@@ -71,3 +71,86 @@ export interface UseOrderFormReturn {
   resetForm: () => void
   getTotalAmount: () => number
 }
+
+// Orders Management Types
+export interface OrderListItem {
+  order_id: string
+  customer_name: string
+  order_created_at: string
+  order_status: string
+  payment_status: string
+}
+
+export interface GarmentDetail {
+  garment_id: string
+  garment_tag_id: string | null
+  garment_description: string | null
+  garment_notes: any | null
+  garment_status: string | null
+  created_at: string
+}
+
+export interface OrderItemDetail {
+  order_item_id: string
+  product_id: string
+  product_name: string
+  item_quantity: number
+  item_price_at_sale: number
+  garments: GarmentDetail[]
+}
+
+export interface TransactionDetail {
+  transaction_id: string
+  transaction_amount: number
+  transaction_type: string
+  transaction_payment_method: string
+  created_at: string
+}
+
+export interface InvoiceDetail {
+  invoice_id: string
+  invoice_amount_due: number
+  invoice_due_date: string | null
+  invoice_status: string
+  transactions: TransactionDetail[]
+}
+
+export interface OrderDetail {
+  order_id: string
+  customer_id: string
+  customer_name: string
+  customer_phone_number: string
+  customer_email: string | null
+  order_status: string
+  order_created_at: string
+  order_items: OrderItemDetail[]
+  invoice: InvoiceDetail | null
+}
+
+// Action Result Types
+export interface UpdateOrderStatusResult {
+  order_id: string
+  updated_status: string
+}
+
+export interface UpdateGarmentStatusResult {
+  garment_id: string
+  updated_status: string
+}
+
+export interface ProcessPaymentResult {
+  updated_invoice_id: string
+  new_transaction_id: string
+  new_invoice_status: string
+}
+
+export interface CancelOrderResult {
+  cancelled_order_id: string
+  final_order_status: string
+  final_invoice_status: string
+}
+
+export interface ProcessRefundResult {
+  updated_invoice_id: string
+  new_invoice_status: string
+}

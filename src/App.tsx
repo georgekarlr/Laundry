@@ -13,6 +13,7 @@ import PersonaManagement from './pages/PersonaManagement'
 import Customers from './pages/Customers'
 import Services from './pages/Services'
 import NewOrderPage from './pages/NewOrderPage'
+import Orders from './pages/Orders'
 import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
 
 function App() {
@@ -49,11 +50,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <PlaceholderPage 
-                    title="Orders" 
-                    description="View and manage all customer orders."
-                    icon={Package}
-                  />
+                  <Orders />
                 </Layout>
               </PersonaProtectedRoute>
             </ProtectedRoute>
