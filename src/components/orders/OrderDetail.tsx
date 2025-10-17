@@ -127,7 +127,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-            <p className="text-sm text-gray-600">Order ID: {order.order_id.substring(0, 8)}...</p>
+            <p className="text-sm text-gray-600">Order ID: {order.order_id}...</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
