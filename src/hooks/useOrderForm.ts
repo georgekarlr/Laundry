@@ -60,11 +60,16 @@ export const useOrderForm = (): UseOrderFormReturn => {
       const existingItemIndex = prev.items.findIndex(i => i.product_id === item.product_id)
       
       if (existingItemIndex >= 0) {
-        // Update existing item quantity
+        // Update existing item quantity and merge garments
         const updatedItems = [...prev.items]
+        const existingItem = updatedItems[existingItemIndex]
+        const existingGarments = existingItem.garments || []
+        const newGarments = item.garments || []
+        
         updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + item.quantity
+          ...existingItem,
+          quantity: existingItem.quantity + item.quantity,
+          garments: [...existingGarments, ...newGarments]
         }
         return {
           ...prev,
@@ -98,6 +103,17 @@ export const useOrderForm = (): UseOrderFormReturn => {
       items: prev.items.map(item =>
         item.product_id === productId
           ? { ...item, quantity }
+          : item
+      )
+    }))
+  }
+
+  const updateOrderItemGarments = (productId: string, garments: GarmentData[]) => {
+    setOrderFormState(prev => ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.product_id === productId
+          ? { ...item, garments }
           : item
       )
     }))
@@ -146,7 +162,7 @@ export const useOrderForm = (): UseOrderFormReturn => {
         p_order_items: orderFormState.items.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
-          price_at_sale: item.price_at_sale
+          garments: item.garments || []
         })),
         p_payment_option: paymentOption,
         p_payment_method: paymentMethod || null,
@@ -193,6 +209,7 @@ export const useOrderForm = (): UseOrderFormReturn => {
     addOrderItem,
     removeOrderItem,
     updateOrderItemQuantity,
+    updateOrderItemGarments,
     setPaymentDetails,
     submitOrder,
     resetForm,
