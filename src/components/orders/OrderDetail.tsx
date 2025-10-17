@@ -2,20 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { OrderService } from '../../services/orderService'
 import { OrderDetail as OrderDetailType } from '../../types/order'
 import { useAuth } from '../../contexts/AuthContext'
-import { 
-  ArrowLeft, 
-  User, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Package, 
-  CreditCard, 
-  DollarSign,
-  Edit,
-  X,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react'
+import { ArrowLeft, User, Phone, Mail, Calendar, Package, CreditCard, DollarSign, CreditCard as Edit, X, AlertCircle, CheckCircle } from 'lucide-react'
 import UpdateOrderStatusModal from './modals/UpdateOrderStatusModal'
 import UpdateGarmentStatusModal from './modals/UpdateGarmentStatusModal'
 import ProcessPaymentModal from './modals/ProcessPaymentModal'

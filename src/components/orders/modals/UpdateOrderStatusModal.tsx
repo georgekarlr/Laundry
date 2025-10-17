@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { OrderService } from '../../../services/orderService'
-import { Edit, X, AlertCircle } from 'lucide-react'
+import { CreditCard as Edit, X, AlertCircle } from 'lucide-react'
 
 interface UpdateOrderStatusModalProps {
   isOpen: boolean
