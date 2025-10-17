@@ -109,6 +109,7 @@ const NewOrderPage: React.FC = () => {
             onAddOrderItem={addOrderItem}
             onRemoveOrderItem={removeOrderItem}
             onUpdateOrderItemQuantity={updateOrderItemQuantity}
+            onUpdateOrderItemGarments={updateOrderItemGarments}
             initialOrderItems={orderFormState.items}
           />
         )

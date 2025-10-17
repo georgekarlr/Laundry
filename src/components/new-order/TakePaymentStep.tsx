@@ -1,105 +1,276 @@
-import React, { useState } from 'react'
-import { OrderItem, CreateOrderResult } from '../../types/order'
-import { ArrowLeft, CreditCard, DollarSign, Clock, Wallet, AlertCircle, CheckCircle, Receipt } from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Customer, CustomerService } from '../../services/customerService'
+import { CustomerData } from '../../types/order'
+import CustomerList from '../customers/CustomerList'
+import { Search, UserPlus, ArrowRight, X, User, Phone, Mail, AlertCircle, CheckCircle } from 'lucide-react'
 
-interface TakePaymentStepProps {
-  onPrevious: () => void
-  onSubmitOrder: (paymentOption: 'PAY_LATER' | 'PAY_NOW' | 'USE_CREDIT', paymentMethod?: string | null, amountPaid?: number) => Promise<void>
-  orderItems: OrderItem[]
-  totalAmountDue: number
-  isSubmittingOrder: boolean
-  orderSubmissionError: string | null
-  orderSubmissionSuccess: CreateOrderResult | null
-  onResetForm: () => void
-}
+interface SelectCustomerStepProps {
+  onNext: () => void
+  onSelectCustomer: (customer: CustomerData) => void
+  initialCustomer?: CustomerData | null
+} 
 
-const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
-  onPrevious,
-  onSubmitOrder,
-  orderItems,
-  totalAmountDue,
-  isSubmittingOrder,
-  orderSubmissionError,
-  orderSubmissionSuccess,
-  onResetForm
+const SelectCustomerStep: React.FC<SelectCustomerStepProps> = ({
+  onNext,
+  onSelectCustomer,
+  initialCustomer
 }) => {
-  const [paymentOption, setPaymentOption] = useState<'PAY_LATER' | 'PAY_NOW' | 'USE_CREDIT'>('PAY_NOW')
-  const [paymentMethod, setPaymentMethod] = useState<string>('CASH')
-  const [amountPaid, setAmountPaid] = useState<number>(totalAmountDue)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  
+  // New customer creation state
+  const [isCreatingNewCustomer, setIsCreatingNewCustomer] = useState(false)
+  const [newCustomerName, setNewCustomerName] = useState('')
+  const [newCustomerPhone, setNewCustomerPhone] = useState('')
+  const [newCustomerEmail, setNewCustomerEmail] = useState('')
+  const [createLoading, setCreateLoading] = useState(false)
+  const [createError, setCreateError] = useState('')
+  const [createSuccess, setCreateSuccess] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (paymentOption === 'PAY_NOW' && amountPaid < totalAmountDue) {
-      return // Let the form validation handle this
+  useEffect(() => {
+    loadCustomers()
+  }, [])
+
+  useEffect(() => {
+    if (initialCustomer && initialCustomer.customer_id) {
+      const customer = customers.find(c => c.customer_id === initialCustomer.customer_id)
+      if (customer) {
+        setSelectedCustomer(customer)
+      }
+    }
+  }, [initialCustomer, customers])
+
+  const loadCustomers = async () => {
+    setLoading(true)
+    setError('')
+    const result = await CustomerService.getAllCustomers()
+    if (result.success && result.data) {
+      setCustomers(result.data)
+    } else {
+      setError(result.message)
+    }
+    setLoading(false)
+  }
+
+  const filteredCustomers = useMemo(() => {
+    if (!searchTerm) {
+      return customers
     }
 
-    await onSubmitOrder(
-      paymentOption,
-      paymentOption === 'PAY_LATER' ? null : paymentMethod,
-      paymentOption === 'PAY_LATER' ? 0 : amountPaid
-    )
+    const lowerCaseSearchTerm = searchTerm.toLowerCase()
+    return customers.filter(customer => {
+      const name = customer.customer_name?.toLowerCase() ?? ''
+      const email = customer.customer_email?.toLowerCase() ?? ''
+      const phone = customer.customer_phone_number?.toLowerCase() ?? ''
+
+      return (
+        name.includes(lowerCaseSearchTerm) ||
+        email.includes(lowerCaseSearchTerm) ||
+        phone.includes(lowerCaseSearchTerm)
+      )
+    })
+  }, [customers, searchTerm])
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    const customerData: CustomerData = {
+      customer_id: customer.customer_id,
+      customer_name: customer.customer_name,
+      customer_phone_number: customer.customer_phone_number,
+      customer_email: customer.customer_email || undefined
+    }
+    onSelectCustomer(customerData)
   }
 
-  const handleCreateAnotherOrder = () => {
-    onResetForm()
+  const handleNext = () => {
+    if (selectedCustomer) {
+      onNext()
+    }
   }
 
-  // If order was successfully created, show success screen
-  if (orderSubmissionSuccess) {
+  const handleCreateNewCustomer = () => {
+    setIsCreatingNewCustomer(true)
+    setCreateError('')
+    setCreateSuccess('')
+    setNewCustomerName('')
+    setNewCustomerPhone('')
+    setNewCustomerEmail('')
+  }
+
+  const handleCancelCreate = () => {
+    setIsCreatingNewCustomer(false)
+    setCreateError('')
+    setCreateSuccess('')
+    setNewCustomerName('')
+    setNewCustomerPhone('')
+    setNewCustomerEmail('')
+  }
+
+  const handleSubmitNewCustomer = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreateLoading(true)
+    setCreateError('')
+    setCreateSuccess('')
+
+    if (!newCustomerName.trim()) {
+      setCreateError('Customer name is required')
+      setCreateLoading(false)
+      return
+    }
+
+    if (!newCustomerPhone.trim()) {
+      setCreateError('Phone number is required')
+      setCreateLoading(false)
+      return
+    }
+
+    try {
+      const result = await CustomerService.createCustomer(
+        newCustomerName.trim(),
+        newCustomerPhone.trim(),
+        newCustomerEmail.trim() || undefined
+      )
+
+      if (result.success && result.data) {
+        setCreateSuccess('Customer created successfully!')
+        
+        // Select the newly created customer
+        const newCustomerData: CustomerData = {
+          customer_id: result.data.customer_id,
+          customer_name: result.data.customer_name,
+          customer_phone_number: result.data.customer_phone_number,
+          customer_email: result.data.customer_email || undefined
+        }
+        
+        onSelectCustomer(newCustomerData)
+        setSelectedCustomer(result.data)
+        
+        // Refresh the customer list
+        await loadCustomers()
+        
+        // Close the form and proceed to next step
+        setIsCreatingNewCustomer(false)
+        setTimeout(() => {
+          onNext()
+        }, 500)
+      } else {
+        setCreateError(result.message)
+      }
+    } catch (error) {
+      setCreateError('Failed to create customer')
+    } finally {
+      setCreateLoading(false)
+    }
+  }
+
+  if (isCreatingNewCustomer) {
     return (
       <div className="space-y-6">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Create New Customer</h2>
+            <p className="text-sm text-gray-600">Add a new customer to your database</p>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Order Created Successfully!</h2>
-          <p className="text-gray-600">Your order has been processed and saved to the system.</p>
+          <button
+            onClick={handleCancelCreate}
+            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
+
+        {createError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
+            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+            <p className="text-sm text-red-700">{createError}</p>
+          </div>
+        )}
+
+        {createSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-3">
+            <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+            <p className="text-sm text-green-700">{createSuccess}</p>
+          </div>
+        )}
 
         <div className="bg-white shadow-sm rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmitNewCustomer} className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-gray-500">Order ID</p>
-              <p className="text-lg font-mono text-gray-900">{orderSubmissionSuccess.new_order_id.substring(0, 8)}...</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Invoice ID</p>
-              <p className="text-lg font-mono text-gray-900">{orderSubmissionSuccess.new_invoice_id.substring(0, 8)}...</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-          <div className="space-y-2">
-            {orderItems.map((item) => (
-              <div key={item.product_id} className="flex justify-between text-sm">
-                <span>{item.product_name} × {item.quantity}</span>
-                <span>${(item.price_at_sale * item.quantity).toFixed(2)}</span>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Customer Name *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={newCustomerName}
+                  onChange={(e) => setNewCustomerName(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter customer name"
+                />
               </div>
-            ))}
-            <div className="border-t border-gray-200 pt-2 flex justify-between font-medium">
-              <span>Total</span>
-              <span>${totalAmountDue.toFixed(2)}</span>
             </div>
-          </div>
-        </div>
 
-        <div className="flex justify-center space-x-4">
-          <button
-            onClick={handleCreateAnotherOrder}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Create Another Order
-          </button>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center space-x-2 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Receipt className="h-4 w-4" />
-            <span>Print Receipt</span>
-          </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="tel"
+                  required
+                  value={newCustomerPhone}
+                  onChange={(e) => setNewCustomerPhone(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address (Optional)
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  value={newCustomerEmail}
+                  onChange={(e) => setNewCustomerEmail(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter email address"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={handleCancelCreate}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createLoading}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {createLoading ? 'Creating...' : 'Create Customer'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     )
@@ -108,184 +279,57 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Payment</h2>
-        <p className="text-sm text-gray-600">Choose payment method and complete the order</p>
+        <h2 className="text-xl font-semibold text-gray-900">Select Customer</h2>
+        <p className="text-sm text-gray-600">Choose an existing customer or create a new one</p>
       </div>
 
-      {orderSubmissionError && (
+      {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
           <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700">{orderSubmissionError}</p>
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Order Summary */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Order Summary</h3>
-          <div className="bg-white shadow-sm rounded-lg">
-            <div className="divide-y divide-gray-200">
-              {orderItems.map((item) => (
-                <div key={item.product_id} className="p-4">
-                  <div className="flex justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-                      <p className="text-sm text-gray-500">
-                        ${item.price_at_sale.toFixed(2)} × {item.quantity}
-                      </p>
-                    </div>
-                    <span className="font-medium text-gray-900">
-                      ${(item.price_at_sale * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-200 p-4 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-medium text-gray-900">Total Amount:</span>
-                <span className="text-xl font-bold text-blue-600">${totalAmountDue.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3 flex-1">
+          <Search className="h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search customers by name, email, or phone..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <button
+          onClick={handleCreateNewCustomer}
+          className="ml-4 flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          <UserPlus className="h-4 w-4" />
+          <span>New Customer</span>
+        </button>
+      </div>
 
-        {/* Payment Options */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Payment Options</h3>
-          <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-lg p-6 space-y-6">
-            {/* Payment Option Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Payment Option</label>
-              <div className="space-y-3">
-                <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentOption"
-                    value="PAY_NOW"
-                    checked={paymentOption === 'PAY_NOW'}
-                    onChange={(e) => setPaymentOption(e.target.value as 'PAY_NOW')}
-                    className="text-blue-600"
-                  />
-                  <CreditCard className="h-5 w-5 text-green-600" />
-                  <div>
-                    <span className="font-medium text-gray-900">Pay Now</span>
-                    <p className="text-sm text-gray-500">Complete payment immediately</p>
-                  </div>
-                </label>
+      <CustomerList
+        customers={filteredCustomers}
+        loading={loading}
+        error={error}
+        selectedCustomer={selectedCustomer}
+        onSelectCustomer={handleSelectCustomer}
+      />
 
-                <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentOption"
-                    value="PAY_LATER"
-                    checked={paymentOption === 'PAY_LATER'}
-                    onChange={(e) => setPaymentOption(e.target.value as 'PAY_LATER')}
-                    className="text-blue-600"
-                  />
-                  <Clock className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <span className="font-medium text-gray-900">Pay Later</span>
-                    <p className="text-sm text-gray-500">Customer will pay upon pickup</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="radio"
-                    name="paymentOption"
-                    value="USE_CREDIT"
-                    checked={paymentOption === 'USE_CREDIT'}
-                    onChange={(e) => setPaymentOption(e.target.value as 'USE_CREDIT')}
-                    className="text-blue-600"
-                  />
-                  <Wallet className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <span className="font-medium text-gray-900">Use Store Credit</span>
-                    <p className="text-sm text-gray-500">Pay using customer's store credit</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* Payment Method (only for PAY_NOW and USE_CREDIT) */}
-            {(paymentOption === 'PAY_NOW' || paymentOption === 'USE_CREDIT') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="CASH">Cash</option>
-                  <option value="CREDIT_CARD">Credit Card</option>
-                  <option value="STORE_CREDIT">Store Credit</option>
-                  <option value="BANK_TRANSFER">Bank Transfer</option>
-                </select>
-              </div>
-            )}
-
-            {/* Amount Paid (only for PAY_NOW and USE_CREDIT) */}
-            {(paymentOption === 'PAY_NOW' || paymentOption === 'USE_CREDIT') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Amount Paid</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max={totalAmountDue}
-                    value={amountPaid}
-                    onChange={(e) => setAmountPaid(Number(e.target.value))}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                {amountPaid < totalAmountDue && (
-                  <p className="text-sm text-red-600 mt-1">
-                    Amount paid must equal the total amount due (${totalAmountDue.toFixed(2)})
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div className="flex justify-between pt-4">
-              <button
-                type="button"
-                onClick={onPrevious}
-                className="flex items-center space-x-2 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                disabled={isSubmittingOrder}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Previous: Services</span>
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmittingOrder || (paymentOption === 'PAY_NOW' && amountPaid < totalAmountDue)}
-                className="flex items-center space-x-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmittingOrder ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Creating Order...</span>
-                  </>
-                ) : (
-                  <>
-                    <Receipt className="h-4 w-4" />
-                    <span>Create Order</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+      <div className="flex justify-end">
+        <button
+          onClick={handleNext}
+          disabled={!selectedCustomer}
+          className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span>Next: Add Services</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   )
 }
 
-export default TakePaymentStep
+export default SelectCustomerStep
