@@ -6,6 +6,7 @@ import {
   CustomerData,
   OrderItem,
   PaymentDetails,
+  GarmentData,
   CreateOrderResult,
   UseOrderFormReturn,
   CreateOrderPayload
@@ -58,19 +59,27 @@ export const useOrderForm = (): UseOrderFormReturn => {
   const addOrderItem = (item: OrderItem) => {
     setOrderFormState(prev => {
       const existingItemIndex = prev.items.findIndex(i => i.product_id === item.product_id)
-      
+
       if (existingItemIndex >= 0) {
         // Update existing item quantity
         const updatedItems = [...prev.items]
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + item.quantity
+          quantity: updatedItems[existingItemIndex].quantity + item.quantity,
+          // Merge garments if the item already exists and new garments are provided
+          garments: item.garments
+            ? [...(updatedItems[existingItemIndex].garments || []), ...item.garments]
+            : updatedItems[existingItemIndex].garments
         }
         return {
           ...prev,
           items: updatedItems
         }
       } else {
+        // Ensure garments array is initialized if not present
+        if (item.garments === undefined) {
+          item.garments = []
+        }
         // Add new item
         return {
           ...prev,
@@ -103,6 +112,16 @@ export const useOrderForm = (): UseOrderFormReturn => {
     }))
   }
 
+  const updateOrderItemGarments = (productId: string, garments: GarmentData[]) => {
+    setOrderFormState(prev => ({
+      ...prev,
+      items: prev.items.map(item =>
+        item.product_id === productId
+          ? { ...item, garments }
+          : item
+      )
+    }))
+  }
   const setPaymentDetails = (payment: PaymentDetails) => {
     setOrderFormState(prev => ({
       ...prev,
@@ -146,7 +165,8 @@ export const useOrderForm = (): UseOrderFormReturn => {
         p_order_items: orderFormState.items.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
-          price_at_sale: item.price_at_sale
+          price_at_sale: item.price_at_sale,
+          garments: item.garments || [] // Include garments array, even if empty
         })),
         p_payment_option: paymentOption,
         p_payment_method: paymentMethod || null,
@@ -193,6 +213,7 @@ export const useOrderForm = (): UseOrderFormReturn => {
     addOrderItem,
     removeOrderItem,
     updateOrderItemQuantity,
+    updateOrderItemGarments,
     setPaymentDetails,
     submitOrder,
     resetForm,

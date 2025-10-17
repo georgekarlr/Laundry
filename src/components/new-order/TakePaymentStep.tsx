@@ -80,7 +80,7 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
                   <span>${(item.price_at_sale * item.quantity).toFixed(2)}</span>
                 </div>
                 {item.garments && item.garments.length > 0 && (
-                  <div className="mt-1">
+                  <div className="mt-2 ml-4">
                     <p className="text-xs text-gray-500">
                       {item.garments.length} garment{item.garments.length !== 1 ? 's' : ''} included
                     </p>
@@ -152,7 +152,7 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
                       <p className="text-xs font-medium text-gray-700">Garments ({item.garments.length}):</p>
                       <div className="grid grid-cols-1 gap-1 mt-1">
                         {item.garments.map((garment, index) => (
-                          <div key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                          <div key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-200">
                             <div className="font-medium">{garment.tag_id}</div>
                             <div>{garment.description}</div>
                             {garment.notes && <div className="text-gray-500 italic">{garment.notes}</div>}

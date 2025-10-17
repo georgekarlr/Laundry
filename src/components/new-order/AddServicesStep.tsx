@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Product, ProductService } from '../../services/productService'
-import { OrderItem } from '../../types/order'
+import { OrderItem, GarmentData } from '../../types/order'
 import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle } from 'lucide-react'
 
 interface AddServicesStepProps {
@@ -8,7 +8,9 @@ interface AddServicesStepProps {
   onPrevious: () => void
   onAddOrderItem: (item: OrderItem) => void
   onRemoveOrderItem: (productId: string) => void
-  onUpdateOrderItemQuantity: (productId: string, quantity: number) => void
+  onUpdateOrderItemQuantity: (productId: string, quantity: number) => void // For updating quantity of existing item
+  onUpdateOrderItemGarments: (productId: string, garments: GarmentData[]) => void // For updating garments of existing item
+
   initialOrderItems: OrderItem[]
 }
 
@@ -18,6 +20,8 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
   onAddOrderItem,
   onRemoveOrderItem,
   onUpdateOrderItemQuantity,
+  onUpdateOrderItemGarments,
+
   initialOrderItems
 }) => {
   const [products, setProducts] = useState<Product[]>([])
@@ -25,6 +29,13 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
   const [error, setError] = useState('')
   const [selectedQuantities, setSelectedQuantities] = useState<{ [key: string]: number }>({})
 
+  // State for garment modal
+  const [showGarmentModal, setShowGarmentModal] = useState(false)
+  const [currentOrderItemForGarments, setCurrentOrderItemForGarments] = useState<OrderItem | null>(null)
+  const [garmentTagId, setGarmentTagId] = useState('')
+  const [garmentDescription, setGarmentDescription] = useState('')
+  const [garmentNotes, setGarmentNotes] = useState('')
+  const [garmentModalError, setGarmentModalError] = useState('')
   useEffect(() => {
     loadProducts()
   }, [])
@@ -48,7 +59,8 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
       product_name: product.product_name,
       quantity,
       price_at_sale: product.product_base_price,
-      product_pricing_model: product.product_pricing_model
+      product_pricing_model: product.product_pricing_model,
+      garments: [] // Initialize with an empty array for garments
     }
     onAddOrderItem(orderItem)
     setSelectedQuantities(prev => ({ ...prev, [product.product_id]: 1 }))
@@ -64,6 +76,59 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
 
   const handleRemoveOrderItem = (productId: string) => {
     onRemoveOrderItem(productId)
+  }
+
+  const handleOpenGarmentModal = (item: OrderItem) => {
+    setCurrentOrderItemForGarments(item)
+    setShowGarmentModal(true)
+    setGarmentModalError('')
+  }
+
+  const handleCloseGarmentModal = () => {
+    setShowGarmentModal(false)
+    setCurrentOrderItemForGarments(null)
+    setGarmentTagId('')
+    setGarmentDescription('')
+    setGarmentNotes('')
+    setGarmentModalError('')
+  }
+
+  const handleAddGarment = () => {
+    if (!garmentTagId.trim() || !garmentDescription.trim()) {
+      setGarmentModalError('Tag ID and Description are required.')
+      return
+    }
+
+    if (currentOrderItemForGarments) {
+      const newGarment: GarmentData = {
+        tag_id: garmentTagId.trim(),
+        description: garmentDescription.trim(),
+        notes: garmentNotes.trim() ? { text: garmentNotes.trim() } : undefined, // Store notes as JSONB object
+      }
+      const updatedGarments = [...(currentOrderItemForGarments.garments || []), newGarment]
+      onUpdateOrderItemGarments(currentOrderItemForGarments.product_id, updatedGarments)
+      handleCloseGarmentModal()
+    }
+  }
+
+  const handleEditGarment = (index: number, updatedGarment: GarmentData) => {
+    if (currentOrderItemForGarments) {
+      const updatedGarments = [...(currentOrderItemForGarments.garments || [])]
+      updatedGarments[index] = updatedGarment
+      onUpdateOrderItemGarments(currentOrderItemForGarments.product_id, updatedGarments)
+    }
+  }
+
+  const handleRemoveGarment = (index: number) => {
+    if (currentOrderItemForGarments) {
+      const updatedGarments = (currentOrderItemForGarments.garments || []).filter((_, i) => i !== index)
+      onUpdateOrderItemGarments(currentOrderItemForGarments.product_id, updatedGarments)
+    }
+  }
+
+  const getGarmentCount = (productId: string) => {
+    const item = initialOrderItems.find(i => i.product_id === productId)
+    return item?.garments?.length || 0
   }
 
   const getTotalAmount = () => {
@@ -136,6 +201,7 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                           </button>
                         </div>
                         <button
+                          type="button"
                           onClick={() => handleAddService(product)}
                           className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                         >
@@ -172,6 +238,14 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                             ${item.price_at_sale.toFixed(2)} each - {item.product_pricing_model.replace(/_/g, ' ')}
                           </p>
                         </div>
+                        {item.garments && item.garments.length > 0 && (
+                          <div className="flex items-center space-x-1 text-sm text-gray-600">
+                            <Package className="h-4 w-4" />
+                            <span>{item.garments.length} Garment{item.garments.length !== 1 ? 's' : ''}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center space-x-1">
                             <button
@@ -190,17 +264,64 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                             </button>
                           </div>
                           <button
+                            type="button"
+                            onClick={() => handleOpenGarmentModal(item)}
+                            className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-md hover:bg-blue-200 transition-colors"
+                          >
+                            Add Garment
+                          </button>
+                          <button
                             onClick={() => handleRemoveOrderItem(item.product_id)}
                             className="p-1 rounded-md text-red-400 hover:text-red-600 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
+                        <div className="text-right">
+                          <span className="text-sm font-medium text-gray-900">
+                            Subtotal: ${(item.price_at_sale * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
                       </div>
                       <div className="mt-2 text-right">
                         <span className="text-sm font-medium text-gray-900">
                           Subtotal: ${(item.price_at_sale * item.quantity).toFixed(2)}
                         </span>
+                      </div>
+                      {/* Display Garments for this item */}
+                      {item.garments && item.garments.length > 0 && (
+                        <div className="mt-4 border-t border-gray-100 pt-3">
+                          <p className="text-xs font-medium text-gray-700 mb-2">Garments:</p>
+                          <div className="space-y-2">
+                            {item.garments.map((garment, index) => (
+                              <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-800">{garment.tag_id}</p>
+                                  <p className="text-xs text-gray-600">{garment.description}</p>
+                                  {garment.notes && <p className="text-xs text-gray-500 italic">{garment.notes.text}</p>}
+                                </div>
+                                <div className="flex space-x-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenGarmentModal({ ...item, garments: [garment] })} // Pass single garment for editing
+                                    className="p-1 rounded-md text-blue-400 hover:text-blue-600 hover:bg-blue-50"
+                                    title="Edit Garment"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveGarment(index)}
+                                    className="p-1 rounded-md text-red-400 hover:text-red-600 hover:bg-red-50"
+                                    title="Remove Garment"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -235,6 +356,90 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
         </button>
       </div>
     </div>
+
+    {/* Garment Modal */}
+    {showGarmentModal && currentOrderItemForGarments && (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={handleCloseGarmentModal}></div>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
+              <div className="flex items-center space-x-3">
+                <Package className="h-6 w-6 text-blue-600" />
+                <h3 className="text-lg font-medium text-gray-900">
+                  Add Garment for {currentOrderItemForGarments.product_name}
+                </h3>
+              </div>
+              <button
+                onClick={handleCloseGarmentModal}
+                className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {garmentModalError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-700">{garmentModalError}</p>
+              </div>
+            )}
+
+            <form onSubmit={(e) => { e.preventDefault(); handleAddGarment(); }} className="space-y-4">
+              <div>
+                <label htmlFor="garmentTagId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Garment Tag ID *
+                </label>
+                <input
+                  type="text"
+                  id="garmentTagId"
+                  value={garmentTagId}
+                  onChange={(e) => setGarmentTagId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., G-001, Shirt-A1"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="garmentDescription" className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  id="garmentDescription"
+                  value={garmentDescription}
+                  onChange={(e) => setGarmentDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Men's white cotton shirt, size L"
+                  required
+                ></textarea>
+              </div>
+              <div>
+                <label htmlFor="garmentNotes" className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  id="garmentNotes"
+                  value={garmentNotes}
+                  onChange={(e) => setGarmentNotes(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Missing button, stain on collar"
+                ></textarea>
+              </div>
+              <div className="flex space-x-3 pt-4">
+                <button type="button" onClick={handleCloseGarmentModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  Add Garment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }
 

@@ -17,6 +17,7 @@ const NewOrderPage: React.FC = () => {
     addOrderItem,
     removeOrderItem,
     updateOrderItemQuantity,
+    updateOrderItemGarments,
     submitOrder,
     resetForm,
     getTotalAmount
@@ -109,6 +110,7 @@ const NewOrderPage: React.FC = () => {
             onAddOrderItem={addOrderItem}
             onRemoveOrderItem={removeOrderItem}
             onUpdateOrderItemQuantity={updateOrderItemQuantity}
+            onUpdateOrderItemGarments={updateOrderItemGarments}
             initialOrderItems={orderFormState.items}
           />
         )
