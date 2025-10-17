@@ -8,7 +8,7 @@ export interface Customer {
   customer_phone_number: string
   customer_email: string | null
   customer_preferences: any | null // jsonb type
-  created_at: string
+  created_at: string 
 }
 
 export interface CreditLedgerEntry {
