@@ -74,19 +74,27 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
           <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
           <div className="space-y-2">
             {orderItems.map((item) => (
-              <div key={item.product_id} className="border-b border-gray-200 pb-2 last:border-b-0">
-                <div className="flex justify-between text-sm">
-                  <span>{item.product_name} × {item.quantity}</span>
-                  <span>${(item.price_at_sale * item.quantity).toFixed(2)}</span>
-                </div>
-                {item.garments && item.garments.length > 0 && (
-                  <div className="mt-1">
-                    <p className="text-xs text-gray-500">
-                      {item.garments.length} garment{item.garments.length !== 1 ? 's' : ''} included
-                    </p>
-                  </div>
-                )}
-              </div>
+  <div key={item.product_id} className="border-b border-gray-200 py-3 last:border-b-0">
+    {/* Item Name and Price */}
+    <div className="flex justify-between text-sm">
+      <span>{item.product_name} × {item.quantity}</span>
+      <span className="font-medium">${(item.price_at_sale * item.quantity).toFixed(2)}</span>
+    </div>
+
+    {/* Garment Details (if they exist) */}
+    {item.garments && item.garments.length > 0 && (
+      <div className="mt-2 ml-4">
+        <p className="text-xs text-gray-500 font-medium">Garments ({item.garments.length}):</p>
+        <div className="space-y-1 mt-1">
+          {item.garments.map((garment, index) => (
+            <div key={index} className="text-xs text-gray-600">
+              <span className="font-semibold">{garment.tag_id}</span> - {garment.description}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div> 
             ))}
             <div className="pt-2 flex justify-between font-medium">
               <span>Total</span>
