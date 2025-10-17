@@ -74,12 +74,21 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
           <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
           <div className="space-y-2">
             {orderItems.map((item) => (
-              <div key={item.product_id} className="flex justify-between text-sm">
-                <span>{item.product_name} × {item.quantity}</span>
-                <span>${(item.price_at_sale * item.quantity).toFixed(2)}</span>
+              <div key={item.product_id} className="border-b border-gray-200 pb-2 last:border-b-0">
+                <div className="flex justify-between text-sm">
+                  <span>{item.product_name} × {item.quantity}</span>
+                  <span>${(item.price_at_sale * item.quantity).toFixed(2)}</span>
+                </div>
+                {item.garments && item.garments.length > 0 && (
+                  <div className="mt-1">
+                    <p className="text-xs text-gray-500">
+                      {item.garments.length} garment{item.garments.length !== 1 ? 's' : ''} included
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
-            <div className="border-t border-gray-200 pt-2 flex justify-between font-medium">
+            <div className="pt-2 flex justify-between font-medium">
               <span>Total</span>
               <span>${totalAmountDue.toFixed(2)}</span>
             </div>
@@ -138,6 +147,20 @@ const TakePaymentStep: React.FC<TakePaymentStepProps> = ({
                       ${(item.price_at_sale * item.quantity).toFixed(2)}
                     </span>
                   </div>
+                  {item.garments && item.garments.length > 0 && (
+                    <div className="mt-2 ml-4">
+                      <p className="text-xs font-medium text-gray-700">Garments ({item.garments.length}):</p>
+                      <div className="grid grid-cols-1 gap-1 mt-1">
+                        {item.garments.map((garment, index) => (
+                          <div key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            <div className="font-medium">{garment.tag_id}</div>
+                            <div>{garment.description}</div>
+                            {garment.notes && <div className="text-gray-500 italic">{garment.notes}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
