@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Product, ProductService } from '../../services/productService'
 import { OrderItem, GarmentData } from '../../types/order'
-import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle, Edit, X } from 'lucide-react'
 
 interface AddServicesStepProps {
   onNext: () => void
@@ -322,7 +322,7 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                             ))}
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -355,91 +355,91 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>
-    </div>
 
-    {/* Garment Modal */}
-    {showGarmentModal && currentOrderItemForGarments && (
-      <div className="fixed inset-0 z-50 overflow-y-auto">
-        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={handleCloseGarmentModal}></div>
-          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
-            <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
-              <div className="flex items-center space-x-3">
-                <Package className="h-6 w-6 text-blue-600" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  Add Garment for {currentOrderItemForGarments.product_name}
-                </h3>
+      {/* Garment Modal */}
+      {showGarmentModal && currentOrderItemForGarments && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={handleCloseGarmentModal}></div>
+            <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
+                <div className="flex items-center space-x-3">
+                  <Package className="h-6 w-6 text-blue-600" />
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Add Garment for {currentOrderItemForGarments.product_name}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseGarmentModal}
+                  className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  aria-label="Close modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <button
-                onClick={handleCloseGarmentModal}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" />
-              </button>
+
+              {garmentModalError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-red-700">{garmentModalError}</p>
+                </div>
+              )}
+
+              <form onSubmit={(e) => { e.preventDefault(); handleAddGarment(); }} className="space-y-4">
+                <div>
+                  <label htmlFor="garmentTagId" className="block text-sm font-medium text-gray-700 mb-2">
+                    Garment Tag ID *
+                  </label>
+                  <input
+                    type="text"
+                    id="garmentTagId"
+                    value={garmentTagId}
+                    onChange={(e) => setGarmentTagId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., G-001, Shirt-A1"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="garmentDescription" className="block text-sm font-medium text-gray-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    id="garmentDescription"
+                    value={garmentDescription}
+                    onChange={(e) => setGarmentDescription(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Men's white cotton shirt, size L"
+                    required
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="garmentNotes" className="block text-sm font-medium text-gray-700 mb-2">
+                    Notes (Optional)
+                  </label>
+                  <textarea
+                    id="garmentNotes"
+                    value={garmentNotes}
+                    onChange={(e) => setGarmentNotes(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Missing button, stain on collar"
+                  ></textarea>
+                </div>
+                <div className="flex space-x-3 pt-4">
+                  <button type="button" onClick={handleCloseGarmentModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Add Garment
+                  </button>
+                </div>
+              </form>
             </div>
-
-            {garmentModalError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-red-700">{garmentModalError}</p>
-              </div>
-            )}
-
-            <form onSubmit={(e) => { e.preventDefault(); handleAddGarment(); }} className="space-y-4">
-              <div>
-                <label htmlFor="garmentTagId" className="block text-sm font-medium text-gray-700 mb-2">
-                  Garment Tag ID *
-                </label>
-                <input
-                  type="text"
-                  id="garmentTagId"
-                  value={garmentTagId}
-                  onChange={(e) => setGarmentTagId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., G-001, Shirt-A1"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="garmentDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  id="garmentDescription"
-                  value={garmentDescription}
-                  onChange={(e) => setGarmentDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Men's white cotton shirt, size L"
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label htmlFor="garmentNotes" className="block text-sm font-medium text-gray-700 mb-2">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  id="garmentNotes"
-                  value={garmentNotes}
-                  onChange={(e) => setGarmentNotes(e.target.value)}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Missing button, stain on collar"
-                ></textarea>
-              </div>
-              <div className="flex space-x-3 pt-4">
-                <button type="button" onClick={handleCloseGarmentModal} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Add Garment
-                </button>
-              </div>
-            </form>
           </div>
         </div>
-      </div>
-    )}
+      )}
+    </div>
   )
 }
 
