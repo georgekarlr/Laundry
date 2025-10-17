@@ -132,7 +132,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         </div>
         <div className="flex items-center space-x-2">
           <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.order_status)}`}>
-            {order.order_status.replace(/_/g, ' ')}
+            {order.order_status}
           </span>
         </div>
       </div>
