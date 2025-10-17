@@ -1,9 +1,3 @@
-export interface GarmentData {
-  tag_id: string
-  description: string
-  notes?: any // JSONB type - can be object or null
-}
-
 export interface CustomerData {
   customer_id?: string
   customer_name: string
@@ -17,7 +11,6 @@ export interface OrderItem {
   quantity: number
   price_at_sale: number
   product_pricing_model: 'FIXED' | 'PER_KG' | 'PER_ITEM'
-  garments?: GarmentData[]
 }
 
 export interface PaymentDetails {
@@ -39,7 +32,7 @@ export interface CreateOrderPayload {
   p_order_items: {
     product_id: string
     quantity: number
-    garments?: GarmentData[]
+    price_at_sale: number
   }[]
   p_payment_option: 'PAY_LATER' | 'PAY_NOW' | 'USE_CREDIT'
   p_payment_method: string | null
@@ -64,7 +57,6 @@ export interface UseOrderFormReturn {
   addOrderItem: (item: OrderItem) => void
   removeOrderItem: (productId: string) => void
   updateOrderItemQuantity: (productId: string, quantity: number) => void
-  updateOrderItemGarments: (productId: string, garments: GarmentData[]) => void
   setPaymentDetails: (payment: PaymentDetails) => void
   submitOrder: (paymentOption: 'PAY_LATER' | 'PAY_NOW' | 'USE_CREDIT', paymentMethod?: string | null, amountPaid?: number) => Promise<void>
   resetForm: () => void
