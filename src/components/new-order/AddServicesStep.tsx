@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Product, ProductService } from '../../services/productService'
 import { OrderItem, GarmentData } from '../../types/order'
-import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle, CreditCard a,sEdit, X  Edit, X } from 'lucide-react'ce AddServicesStepProps {
+import { ArrowLeft, ArrowRight, Plus, Minus, Trash2, Package, DollarSign, AlertCircle, Edit, X } from 'lucide-react'
+
+interface AddServicesStepProps {
   onNext: () => void
   onPrevious: () => void
   onAddOrderItem: (item: OrderItem) => void
