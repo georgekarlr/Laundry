@@ -323,7 +323,7 @@ const AddServicesStep: React.FC<AddServicesStepProps> = ({
                           </div>
                         </div>
                       )}
-                    </div>
+                    </div> 
                   ))}
                 </div>
                 <div className="border-t border-gray-200 p-4 bg-gray-50">
