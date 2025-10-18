@@ -105,7 +105,10 @@ export class OrderService {
         }
       }
 
-      if (!data) {
+      // Extract the nested JSONB object from the response
+      const orderDetails = data?.[0]?.get_order_details
+      
+      if (!orderDetails) {
         return {
           success: false,
           message: 'Order not found'
@@ -114,7 +117,7 @@ export class OrderService {
 
       return {
         success: true,
-        data: data as OrderDetail,
+        data: orderDetails as OrderDetail,
         message: 'Order details retrieved successfully'
       }
     } catch (error) {

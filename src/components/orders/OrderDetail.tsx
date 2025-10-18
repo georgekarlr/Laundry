@@ -127,12 +127,12 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-            <p className="text-sm text-gray-600">Order ID: {order.order_id}...</p>
+            <p className="text-sm text-gray-600">Order ID: {order.order_info.order_id.substring(0, 8)}...</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.order_status)}`}>
-            {order.order_status}
+          <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.order_info.order_status)}`}>
+            {order.order_info.order_status}
           </span>
         </div>
       </div>
@@ -157,21 +157,21 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-gray-500">Name</p>
-            <p className="text-lg text-gray-900">{order.customer_name}</p>
+            <p className="text-lg text-gray-900">{order.customer_info.customer_name}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Phone</p>
             <p className="text-lg text-gray-900 flex items-center space-x-1">
               <Phone className="h-4 w-4 text-gray-400" />
-              <span>{order.customer_phone_number}</span>
+              <span>{order.customer_info.customer_phone_number}</span>
             </p>
           </div>
-          {order.customer_email && (
+          {order.customer_info.customer_email && (
             <div>
               <p className="text-sm font-medium text-gray-500">Email</p>
               <p className="text-lg text-gray-900 flex items-center space-x-1">
                 <Mail className="h-4 w-4 text-gray-400" />
-                <span>{order.customer_email}</span>
+                <span>{order.customer_info.customer_email}</span>
               </p>
             </div>
           )}
@@ -179,7 +179,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
             <p className="text-sm font-medium text-gray-500">Order Date</p>
             <p className="text-lg text-gray-900 flex items-center space-x-1">
               <Calendar className="h-4 w-4 text-gray-400" />
-              <span>{new Date(order.order_created_at).toLocaleDateString()}</span>
+              <span>{new Date(order.order_info.created_at).toLocaleDateString()}</span>
             </p>
           </div>
         </div>
@@ -197,7 +197,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
             <span>Update Status</span>
           </button>
           
-          {order.invoice && order.invoice.invoice_status !== 'PAID' && (
+          {order.financial_info && order.financial_info.payment_status !== 'PAID' && (
             <button
               onClick={() => setShowProcessPaymentModal(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -207,7 +207,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
             </button>
           )}
           
-          {order.order_status !== 'CANCELLED' && (
+          {order.order_info.order_status !== 'CANCELLED' && (
             <button
               onClick={() => setShowCancelOrderModal(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -217,7 +217,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
             </button>
           )}
           
-          {order.invoice && order.invoice.invoice_status === 'PAID' && (
+          {order.financial_info && order.financial_info.payment_status === 'PAID' && (
             <button
               onClick={() => setShowProcessRefundModal(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -236,18 +236,18 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
           <h3 className="text-lg font-medium text-gray-900">Order Items</h3>
         </div>
         <div className="space-y-6">
-          {order.order_items.map((item) => (
-            <div key={item.order_item_id} className="border border-gray-200 rounded-lg p-4">
+          {order.line_items.map((item) => (
+            <div key={item.item_id} className="border border-gray-200 rounded-lg p-4">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h4 className="font-medium text-gray-900">{item.product_name}</h4>
                   <p className="text-sm text-gray-500">
-                    Quantity: {item.item_quantity} × ${item.item_price_at_sale.toFixed(2)}
+                    Quantity: {item.quantity} × ${item.price.toFixed(2)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-900">
-                    ${(item.item_quantity * item.item_price_at_sale).toFixed(2)}
+                    ${(item.quantity * item.price).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -302,7 +302,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
       </div>
 
       {/* Invoice Information */}
-      {order.invoice && (
+      {order.financial_info && (
         <div className="bg-white shadow-sm rounded-lg p-6">
           <div className="flex items-center space-x-3 mb-4">
             <CreditCard className="h-5 w-5 text-purple-600" />
@@ -312,29 +312,29 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
             <div>
               <p className="text-sm font-medium text-gray-500">Invoice ID</p>
               <p className="text-sm font-mono text-gray-900">
-                {order.invoice.invoice_id.substring(0, 8)}...
+                {order.financial_info.invoice_id.substring(0, 8)}...
               </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Amount Due</p>
               <p className="text-lg font-medium text-gray-900">
-                ${order.invoice.invoice_amount_due.toFixed(2)}
+                ${order.financial_info.total_amount.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Status</p>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.invoice.invoice_status)}`}>
-                {order.invoice.invoice_status.replace(/_/g, ' ')}
+              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.financial_info.payment_status)}`}>
+                {order.financial_info.payment_status.replace(/_/g, ' ')}
               </span>
             </div>
           </div>
           
           {/* Transactions */}
-          {order.invoice.transactions && order.invoice.transactions.length > 0 && (
+          {order.financial_info.transactions && order.financial_info.transactions.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Transactions</h4>
               <div className="space-y-2">
-                {order.invoice.transactions.map((transaction) => (
+                {order.financial_info.transactions.map((transaction) => (
                   <div key={transaction.transaction_id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                     <div>
                       <p className="text-sm font-medium text-gray-900">
@@ -360,8 +360,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         isOpen={showUpdateOrderModal}
         onClose={() => setShowUpdateOrderModal(false)}
         onSuccess={handleActionSuccess}
-        orderId={order.order_id}
-        currentStatus={order.order_status}
+        orderId={order.order_info.order_id}
+        currentStatus={order.order_info.order_status}
         personName={personName}
       />
 
@@ -380,8 +380,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         isOpen={showProcessPaymentModal}
         onClose={() => setShowProcessPaymentModal(false)}
         onSuccess={handleActionSuccess}
-        orderId={order.order_id}
-        amountDue={order.invoice?.invoice_amount_due || 0}
+        orderId={order.order_info.order_id}
+        amountDue={order.financial_info?.total_amount || 0}
         personName={personName}
       />
 
@@ -389,7 +389,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         isOpen={showCancelOrderModal}
         onClose={() => setShowCancelOrderModal(false)}
         onSuccess={handleActionSuccess}
-        orderId={order.order_id}
+        orderId={order.order_info.order_id}
         personName={personName}
       />
 
@@ -397,8 +397,8 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
         isOpen={showProcessRefundModal}
         onClose={() => setShowProcessRefundModal(false)}
         onSuccess={handleActionSuccess}
-        invoiceId={order.invoice?.invoice_id || ''}
-        maxAmount={order.invoice?.invoice_amount_due || 0}
+        invoiceId={order.financial_info?.invoice_id || ''}
+        maxAmount={order.financial_info?.total_amount || 0}
         personName={personName}
       />
     </div>

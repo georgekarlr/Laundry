@@ -81,6 +81,7 @@ export interface OrderListItem {
   payment_status: string
 }
 
+// New interfaces to match the JSONB structure from get_order_details
 export interface GarmentDetail {
   garment_id: string
   garment_tag_id: string | null
@@ -90,13 +91,26 @@ export interface GarmentDetail {
   created_at: string
 }
 
-export interface OrderItemDetail {
-  order_item_id: string
-  product_id: string
+export interface LineItem {
+  item_id: string
   product_name: string
-  item_quantity: number
-  item_price_at_sale: number
-  garments: GarmentDetail[]
+  quantity: number
+  price: number
+  garments: GarmentDetail[] | null
+}
+
+export interface OrderInfo {
+  order_id: string
+  created_at: string
+  person_name: string
+  order_status: string
+}
+
+export interface CustomerInfo {
+  customer_id: string
+  customer_name: string
+  customer_phone_number: string
+  customer_email?: string | null
 }
 
 export interface TransactionDetail {
@@ -107,24 +121,19 @@ export interface TransactionDetail {
   created_at: string
 }
 
-export interface InvoiceDetail {
+export interface FinancialInfo {
   invoice_id: string
-  invoice_amount_due: number
-  invoice_due_date: string | null
-  invoice_status: string
-  transactions: TransactionDetail[]
+  total_amount: number
+  payment_status: string
+  invoice_due_date?: string | null
+  transactions?: TransactionDetail[]
 }
 
 export interface OrderDetail {
-  order_id: string
-  customer_id: string
-  customer_name: string
-  customer_phone_number: string
-  customer_email: string | null
-  order_status: string
-  order_created_at: string
-  order_items: OrderItemDetail[]
-  invoice: InvoiceDetail | null
+  line_items: LineItem[]
+  order_info: OrderInfo
+  customer_info: CustomerInfo
+  financial_info: FinancialInfo
 }
 
 // Action Result Types
