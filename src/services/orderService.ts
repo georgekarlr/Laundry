@@ -107,6 +107,7 @@ export class OrderService {
 
       // Extract the nested JSONB object from the response
       const orderDetails = data?.[0]
+      console.log(orderDetails);
       
       if (!orderDetails) {
         return {
