@@ -34,7 +34,6 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
     setError('')
     
     const result = await OrderService.getOrderDetails(orderId)
-    console.log(result);
     if (result.success && result.data) {
       setOrder(result.data)
     } else {
