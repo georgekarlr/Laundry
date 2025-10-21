@@ -171,7 +171,7 @@ export const useOrderForm = (): UseOrderFormReturn => {
         p_payment_option: paymentOption,
         p_payment_method: paymentMethod || null,
         p_amount_paid: amountPaid || 0,
-        p_person_name: persona.personName || persona.loginName || 'Unknown'
+        p_person_name: persona.personName || persona.loginName || 'Admin'
       }
 
       const result = await OrderService.createOrder(payload)

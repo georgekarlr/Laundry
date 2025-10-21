@@ -82,7 +82,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
     }
   }
 
-  const personName = persona?.personName || persona?.loginName || 'Unknown'
+  const personName = persona?.personName || persona?.loginName || 'Admin'
 
   if (loading) {
     return (

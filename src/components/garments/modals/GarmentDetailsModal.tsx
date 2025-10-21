@@ -29,7 +29,7 @@ const statusColor = (status?: string | null) => {
 
 const GarmentDetailsModal: React.FC<GarmentDetailsModalProps> = ({ isOpen, garmentId, onClose, onUpdated }) => {
   const { persona } = useAuth()
-  const personName = persona?.personName || persona?.loginName || 'Unknown'
+  const personName = persona?.personName || persona?.loginName || 'Admin'
 
   const [details, setDetails] = useState<GarmentDetails | null>(null)
   const [loading, setLoading] = useState(false)
