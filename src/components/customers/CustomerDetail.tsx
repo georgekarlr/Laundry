@@ -6,9 +6,10 @@ import LoadingSpinner from '../LoadingSpinner'
 interface CustomerDetailProps {
   customer: Customer
   onClose: () => void
+  onEdit?: (customer: Customer) => void
 }
 
-const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose }) => {
+const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEdit }) => {
   const [ledger, setLedger] = useState<CreditLedgerEntry[]>([])
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([])
   const [loadingLedger, setLoadingLedger] = useState(true)
@@ -45,19 +46,33 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose }) =>
   }, [customer.customer_id])
 
   return (
-    <div className="bg-white shadow-sm rounded-lg p-6 space-y-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
+        <div className="inline-block w-full max-w-3xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+          <div className="max-h-[80vh] overflow-y-auto p-6 space-y-6">
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <div className="flex items-center space-x-3">
           <User className="h-6 w-6 text-blue-600" />
           <h2 className="text-xl font-bold text-gray-900">Customer Details</h2>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-          aria-label="Close details"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center space-x-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(customer)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="Close details"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Customer Basic Info */}
@@ -207,7 +222,10 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose }) =>
           </div>
         )}
       </div>
+      </div>
     </div>
+  </div>
+</div>
   )
 }
 

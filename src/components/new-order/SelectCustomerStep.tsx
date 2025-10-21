@@ -3,6 +3,8 @@ import { Customer, CustomerService } from '../../services/customerService'
 import { CustomerData } from '../../types/order'
 import CustomerList from '../customers/CustomerList'
 import { Search, UserPlus, ArrowRight, X, User, Phone, Mail, AlertCircle, CheckCircle } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+
 
 interface SelectCustomerStepProps {
   onNext: () => void
@@ -15,7 +17,9 @@ const SelectCustomerStep: React.FC<SelectCustomerStepProps> = ({
   onSelectCustomer,
   initialCustomer
 }) => {
-  const [customers, setCustomers] = useState<Customer[]>([])
+    const { persona } = useAuth()
+
+    const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -129,10 +133,13 @@ const SelectCustomerStep: React.FC<SelectCustomerStepProps> = ({
 
     try {
       const result = await CustomerService.createCustomer(
+          persona?.personName || 'admin',
         newCustomerName.trim(),
         newCustomerPhone.trim(),
         newCustomerEmail.trim() || undefined
       )
+
+        console.log(result);
 
       if (result.success && result.data) {
         setCreateSuccess('Customer created successfully!')

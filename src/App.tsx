@@ -14,7 +14,10 @@ import Customers from './pages/Customers'
 import Services from './pages/Services'
 import NewOrderPage from './pages/NewOrderPage'
 import Orders from './pages/Orders'
-import { PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt } from 'lucide-react'
+import Garments from './pages/Garments'
+import Transactions from './pages/Transactions'
+import Reports from './pages/Reports'
+import { PlusCircle, Package, Users, PenTool as Tool, Receipt } from 'lucide-react'
 
 function App() {
   return (
@@ -56,6 +59,16 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/garments" element={
+            <ProtectedRoute>
+              <PersonaProtectedRoute>
+                <Layout>
+                  <Garments />
+                </Layout>
+              </PersonaProtectedRoute>
+            </ProtectedRoute>
+          } />
+          
           <Route path="/customers" element={
             <ProtectedRoute>
               <PersonaProtectedRoute>
@@ -84,11 +97,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <PlaceholderPage 
-                    title="Financial Reports" 
-                    description="View comprehensive financial reports and analytics."
-                    icon={Receipt}
-                  />
+                  <Reports />
                 </Layout>
               </PersonaProtectedRoute>
             </ProtectedRoute>
@@ -98,11 +107,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <PlaceholderPage 
-                    title="Transactions" 
-                    description="View and manage all financial transactions."
-                    icon={DollarSign}
-                  />
+                  <Transactions />
                 </Layout>
               </PersonaProtectedRoute>
             </ProtectedRoute>

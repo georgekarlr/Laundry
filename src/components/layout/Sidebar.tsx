@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { LayoutDashboard, PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt, ChevronDown, ChevronUp, X, Shield } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Package, Users, PenTool as Tool, DollarSign, Receipt, ChevronDown, ChevronUp, X, Shield, Shirt } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -12,6 +12,7 @@ const adminNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'New Order', href: '/new-order', icon: PlusCircle },
   { name: 'Orders', href: '/orders', icon: Package },
+  { name: 'Garments', href: '/garments', icon: Shirt },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Services', href: '/services', icon: Tool },
   { 
@@ -29,6 +30,7 @@ const staffNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'New Order', href: '/new-order', icon: PlusCircle },
   { name: 'Orders', href: '/orders', icon: Package },
+  { name: 'Garments', href: '/garments', icon: Shirt },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Services', href: '/services', icon: Tool },
   { 

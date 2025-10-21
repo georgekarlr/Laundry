@@ -3,7 +3,8 @@ import { Customer, CustomerService } from '../services/customerService'
 import CustomerList from '../components/customers/CustomerList'
 import CustomerDetail from '../components/customers/CustomerDetail'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { AlertCircle, Users, Search } from 'lucide-react'
+import { AlertCircle, Users, Search, Plus } from 'lucide-react'
+import CustomerFormModal, { CustomerFormValues } from '../components/customers/CustomerFormModal'
 
 const Customers: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -11,6 +12,10 @@ const Customers: React.FC = () => {
   const [error, setError] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [formLoading, setFormLoading] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null)
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -30,10 +35,61 @@ const Customers: React.FC = () => {
 
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomer(customer)
+    setViewingCustomer(customer)
   }
 
   const handleCloseDetail = () => {
-    setSelectedCustomer(null)
+    setViewingCustomer(null)
+  }
+
+  const openAddModal = () => {
+    setEditingCustomer(null)
+    setShowForm(true)
+  }
+
+  const handleEditCustomer = (cust: Customer) => {
+    setEditingCustomer(cust)
+    setShowForm(true)
+  }
+
+  const handleSave = async (values: CustomerFormValues, customerId?: string) => {
+    setFormLoading(true)
+    try {
+      if (customerId) {
+        const res = await CustomerService.updateCustomer(customerId, {
+          person_name: values.person_name,
+          customer_name: values.customer_name,
+          customer_phone_number: values.customer_phone_number,
+          customer_email: values.customer_email,
+          customer_preferences: values.customer_preferences,
+        })
+        if (!res.success || !res.data) {
+          alert(res.message)
+          return
+        }
+        const updated = res.data
+        setCustomers(prev => prev.map(c => c.customer_id === updated.customer_id ? updated : c))
+        setSelectedCustomer(prev => (prev && prev.customer_id === updated.customer_id ? updated : prev))
+      } else {
+        const res = await CustomerService.createCustomer(
+          values.person_name,
+          values.customer_name,
+          values.customer_phone_number,
+          values.customer_email || null,
+          values.customer_preferences || null,
+        )
+        if (!res.success || !res.data) {
+          alert(res.message)
+          return
+        }
+        const created = res.data
+        setCustomers(prev => [...prev, created].sort((a, b) => a.customer_name.localeCompare(b.customer_name)))
+      }
+      setShowForm(false)
+      setEditingCustomer(null)
+    } finally {
+      setFormLoading(false)
+    }
   }
 
   const filteredCustomers = useMemo(() => {
@@ -66,11 +122,20 @@ const Customers: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Manage your customer database and relationships.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage your customer database and relationships.
+          </p>
+        </div>
+        <button
+          onClick={openAddModal}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Customer
+        </button>
       </div>
 
       {/* Filter Section */}
@@ -86,17 +151,26 @@ const Customers: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      {selectedCustomer ? (
-        <CustomerDetail customer={selectedCustomer} onClose={handleCloseDetail} />
-      ) : (
-        <CustomerList
-          customers={filteredCustomers}
-          loading={loading}
-          error={error}
-          selectedCustomer={selectedCustomer}
-          onSelectCustomer={handleSelectCustomer}
-        />
+      <CustomerList
+        customers={filteredCustomers}
+        loading={loading}
+        error={error}
+        selectedCustomer={selectedCustomer}
+        onSelectCustomer={handleSelectCustomer}
+        onEditCustomer={handleEditCustomer}
+      />
+
+      {viewingCustomer && (
+        <CustomerDetail customer={viewingCustomer} onClose={handleCloseDetail} onEdit={handleEditCustomer} />
       )}
+
+      <CustomerFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSave={handleSave}
+        initialCustomer={editingCustomer || undefined}
+        loading={formLoading}
+      />
     </div>
   )
 }

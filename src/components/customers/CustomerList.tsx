@@ -8,6 +8,7 @@ interface CustomerListProps {
   error: string
   selectedCustomer: Customer | null
   onSelectCustomer: (customer: Customer) => void
+  onEditCustomer?: (customer: Customer) => void
 }
 
 const CustomerList: React.FC<CustomerListProps> = ({
@@ -16,6 +17,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
   error,
   selectedCustomer,
   onSelectCustomer,
+  onEditCustomer,
 }) => {
   if (loading) {
     return (
@@ -76,9 +78,22 @@ const CustomerList: React.FC<CustomerListProps> = ({
                   )}
                 </div>
               </div>
-              {selectedCustomer?.customer_id === customer.customer_id && (
-                <span className="text-blue-600 text-sm font-medium">Selected</span>
-              )}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSelectCustomer(customer) }}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  title="View details"
+                >
+                  View
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEditCustomer && onEditCustomer(customer) }}
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  title="Edit customer"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           </li>
         ))}
