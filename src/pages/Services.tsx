@@ -4,7 +4,7 @@ import ProductList from '../components/services/ProductList'
 import ProductFormModal from '../components/services/ProductFormModal'
 import DeleteConfirmationModal from '../components/services/DeleteConfirmationModal'
 import { useProductFilters } from '../hooks/useProductFilters' // Import the custom hook
-import { PenTool as Tool, Plus, AlertCircle, CheckCircle } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle } from 'lucide-react'
 
 const Services: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])

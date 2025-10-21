@@ -1,4 +1,3 @@
-import React from 'react' 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -7,8 +6,6 @@ import Layout from './components/layout/Layout'
 import LoginForm from './components/auth/LoginForm'
 import SignupForm from './components/auth/SignupForm'
 import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
-import PlaceholderPage from './pages/PlaceholderPage'
 import PersonaManagement from './pages/PersonaManagement'
 import Customers from './pages/Customers'
 import Services from './pages/Services'
@@ -17,7 +14,6 @@ import Orders from './pages/Orders'
 import Garments from './pages/Garments'
 import Transactions from './pages/Transactions'
 import Reports from './pages/Reports'
-import { PlusCircle, Package, Users, PenTool as Tool, Receipt } from 'lucide-react'
 
 function App() {
   return (
@@ -83,11 +79,7 @@ function App() {
             <ProtectedRoute>
               <PersonaProtectedRoute>
                 <Layout>
-                  <Services
-                    title="Services" 
-                    description="Manage your service offerings and configurations."
-                    icon={Tool}
-                  />
+                  <Services/>
                 </Layout>
               </PersonaProtectedRoute>
             </ProtectedRoute>
