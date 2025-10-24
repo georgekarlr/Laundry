@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Customer, CustomerService } from '../../services/customerService'
 import { CustomerData } from '../../types/order'
-import CustomerList from '../customers/CustomerList'
 import { Search, UserPlus, ArrowRight, X, User, Phone, Mail, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -317,13 +316,57 @@ const SelectCustomerStep: React.FC<SelectCustomerStepProps> = ({
         </button>
       </div>
 
-      <CustomerList
-        customers={filteredCustomers}
-        loading={loading}
-        error={error}
-        selectedCustomer={selectedCustomer}
-        onSelectCustomer={handleSelectCustomer}
-      />
+      <div role="radiogroup" aria-label="Select a customer" className="bg-white shadow-sm rounded-lg divide-y divide-gray-100">
+        {loading ? (
+          <div className="p-6 text-sm text-gray-500">Loading customers...</div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="p-6 text-sm text-gray-500">No customers found.</div>
+        ) : (
+          filteredCustomers.map((customer) => {
+            const isSelected = selectedCustomer?.customer_id === customer.customer_id
+            return (
+              <label
+                key={customer.customer_id}
+                className={`flex items-start p-4 cursor-pointer transition-colors ${
+                  isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="selectedCustomer"
+                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  checked={isSelected}
+                  onChange={() => handleSelectCustomer(customer)}
+                />
+                <div className="ml-3 flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-900 truncate">{customer.customer_name}</p>
+                    {isSelected && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        Selected
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-sm text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+                    {customer.customer_phone_number && (
+                      <span className="inline-flex items-center">
+                        <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                        {customer.customer_phone_number}
+                      </span>
+                    )}
+                    {customer.customer_email && (
+                      <span className="inline-flex items-center">
+                        <Mail className="h-4 w-4 mr-1 text-gray-400" />
+                        {customer.customer_email}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </label>
+            )
+          })
+        )}
+      </div>
 
       <div className="flex justify-end">
         <button
