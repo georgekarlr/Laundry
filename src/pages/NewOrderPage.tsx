@@ -3,7 +3,7 @@ import { useOrderForm } from '../hooks/useOrderForm'
 import SelectCustomerStep from '../components/new-order/SelectCustomerStep'
 import AddServicesStep from '../components/new-order/AddServicesStep'
 import TakePaymentStep from '../components/new-order/TakePaymentStep'
-import { CheckCircle, User, Package, CreditCard } from 'lucide-react'
+import { CheckCircle2, User, Package, CreditCard } from 'lucide-react'
 
 const NewOrderPage: React.FC = () => {
   const {
@@ -24,142 +24,115 @@ const NewOrderPage: React.FC = () => {
   } = useOrderForm()
 
   const steps = [
-    { number: 1, name: 'Select Customer', icon: User },
-    { number: 2, name: 'Add Services', icon: Package },
+    { number: 1, name: 'Customer', icon: User },
+    { number: 2, name: 'Services', icon: Package },
     { number: 3, name: 'Payment', icon: CreditCard }
   ]
 
   const renderStepIndicator = () => (
-    <div className="mb-8">
-      <div className="flex items-center justify-center space-x-8">
-        {steps.map((step, index) => {
-          const Icon = step.icon
-          const isActive = orderFormState.currentStep === step.number
-          const isCompleted = orderFormState.currentStep > step.number
-          const isAccessible = orderFormState.currentStep >= step.number
+      <nav aria-label="Progress" className="max-w-4xl mx-auto mb-12 px-4">
+        <ol className="flex items-center justify-between w-full">
+          {steps.map((step, index) => {
+            const Icon = step.icon
+            const isActive = orderFormState.currentStep === step.number
+            const isCompleted = orderFormState.currentStep > step.number
 
-          return (
-            <div key={step.number} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`
-                    w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors
+            return (
+                <li key={step.number} className={`flex items-center ${index !== steps.length - 1 ? 'flex-1' : ''}`}>
+                  <div className="flex flex-col items-center relative">
+                    <div
+                        className={`
+                    w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-300 shadow-sm
                     ${isCompleted
-                      ? 'bg-green-600 border-green-600 text-white'
-                      : isActive
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : isAccessible
-                      ? 'border-gray-300 text-gray-500'
-                      : 'border-gray-200 text-gray-300'
-                    }
+                            ? 'bg-emerald-500 border-emerald-500 text-white'
+                            : isActive
+                                ? 'bg-indigo-600 border-indigo-600 text-white ring-4 ring-indigo-100'
+                                : 'bg-white border-slate-200 text-slate-400'
+                        }
                   `}
-                >
-                  {isCompleted ? (
-                    <CheckCircle className="h-5 w-5" />
-                  ) : (
-                    <Icon className="h-5 w-5" />
+                    >
+                      {isCompleted ? <CheckCircle2 className="h-6 w-6" /> : <Icon className="h-5 w-5" />}
+                    </div>
+                    <div className="absolute -bottom-7 whitespace-nowrap hidden sm:block">
+                  <span className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-indigo-600' : isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    {step.name}
+                  </span>
+                    </div>
+                  </div>
+                  {index < steps.length - 1 && (
+                      <div className="flex-1 mx-4 h-0.5 bg-slate-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-emerald-500 transition-all duration-500" style={{ width: isCompleted ? '100%' : '0%' }} />
+                      </div>
                   )}
-                </div>
-                <span
-                  className={`
-                    mt-2 text-sm font-medium
-                    ${isActive
-                      ? 'text-blue-600'
-                      : isCompleted
-                      ? 'text-green-600'
-                      : 'text-gray-500'
-                    }
-                  `}
-                >
-                  {step.name}
-                </span>
-              </div>
-              {index < steps.length - 1 && (
-                <div
-                  className={`
-                    w-16 h-0.5 mx-4 transition-colors
-                    ${orderFormState.currentStep > step.number
-                      ? 'bg-green-600'
-                      : 'bg-gray-200'
-                    }
-                  `}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
-    </div>
+                </li>
+            )
+          })}
+        </ol>
+      </nav>
   )
 
   const renderCurrentStep = () => {
     switch (orderFormState.currentStep) {
       case 1:
-        return (
-          <SelectCustomerStep
-            onNext={nextStep}
-            onSelectCustomer={setCustomer}
-            initialCustomer={orderFormState.customer}
-          />
-        )
+        return <SelectCustomerStep onNext={nextStep} onSelectCustomer={setCustomer} initialCustomer={orderFormState.customer} />
       case 2:
-        return (
-          <AddServicesStep
-            onNext={nextStep}
-            onPrevious={prevStep}
-            onAddOrderItem={addOrderItem}
-            onRemoveOrderItem={removeOrderItem}
-            onUpdateOrderItemQuantity={updateOrderItemQuantity}
-            onUpdateOrderItemGarments={updateOrderItemGarments}
-            initialOrderItems={orderFormState.items}
-          />
-        )
+        return <AddServicesStep onNext={nextStep} onPrevious={prevStep} onAddOrderItem={addOrderItem} onRemoveOrderItem={removeOrderItem} onUpdateOrderItemQuantity={updateOrderItemQuantity} onUpdateOrderItemGarments={updateOrderItemGarments} initialOrderItems={orderFormState.items} />
       case 3:
-        return (
-          <TakePaymentStep
-            onPrevious={prevStep}
-            onSubmitOrder={submitOrder}
-            orderItems={orderFormState.items}
-            totalAmountDue={getTotalAmount()}
-            isSubmittingOrder={isSubmittingOrder}
-            orderSubmissionError={orderSubmissionError}
-            orderSubmissionSuccess={orderSubmissionSuccess}
-            onResetForm={resetForm}
-          />
-        )
+        return <TakePaymentStep onPrevious={prevStep} onSubmitOrder={submitOrder} orderItems={orderFormState.items} totalAmountDue={getTotalAmount()} isSubmittingOrder={isSubmittingOrder} orderSubmissionError={orderSubmissionError} orderSubmissionSuccess={orderSubmissionSuccess} onResetForm={resetForm} />
       default:
         return null
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */} 
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Create New Order</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Follow the steps below to create a new order for your customer
-        </p>
-      </div>
-
-      {/* Step Indicator */}
-      {renderStepIndicator()}
-
-      {/* Current Step Content */}
-      <div className="max-w-6xl mx-auto">
-        {renderCurrentStep()}
-      </div>
-
-      {/* Debug Info (only in development) {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-2">Debug Info:</h4>
-          <pre className="text-xs text-gray-600 overflow-auto">
-            {JSON.stringify(orderFormState, null, 2)}
-          </pre>
+      <div className="min-h-screen bg-slate-50/80 -mt-8 pt-10 px-4 pb-20 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="max-w-5xl mx-auto mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create New Order</h1>
+            <p className="mt-1 text-sm text-slate-500 font-medium">Follow the steps to process the transaction.</p>
+          </div>
+          {orderFormState.customer && orderFormState.currentStep > 1 && (
+              <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shadow-sm animate-in fade-in slide-in-from-right-4">
+                <p className="text-[10px] font-bold text-indigo-400 uppercase">Active Customer</p>
+                <p className="text-sm font-bold text-indigo-900">{orderFormState.customer.customer_name}</p>
+              </div>
+          )}
         </div>
-      )}*/}
-      
-    </div>
+
+        {/* Stepper */}
+        {renderStepIndicator()}
+
+        {/* FIXED WIZARD CONTAINER */}
+        <div className="max-w-5xl mx-auto">
+          <div className="
+          bg-white
+          rounded-[2rem]
+          shadow-[0_20px_50px_rgba(0,0,0,0.05)]
+          border border-slate-200
+          overflow-hidden
+          transition-all
+          duration-500
+        ">
+            {/* Internal Content Area with proper padding (the "Edge Fix") */}
+            <div className="p-4 sm:p-8 lg:p-10 bg-white">
+              <div className="min-h-[400px]">
+                {renderCurrentStep()}
+              </div>
+            </div>
+
+            {/* Subtle footer strip inside the card to anchor the edges */}
+            <div className="h-2 bg-slate-50 border-t border-slate-100" />
+          </div>
+
+          {/* Support Footer */}
+          <div className="mt-10 flex items-center justify-center gap-6 text-slate-400">
+            <div className="h-px w-12 bg-slate-200" />
+            <p className="text-xs font-semibold uppercase tracking-widest">Order Management System</p>
+            <div className="h-px w-12 bg-slate-200" />
+          </div>
+        </div>
+      </div>
   )
 }
 
