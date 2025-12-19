@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { X, Shirt, Calendar, User, Link as LinkIcon, AlertCircle, Loader2, Tag, FileText, Check, Edit3, ExternalLink } from 'lucide-react'
+import { X, Shirt, Calendar, User, Link as LinkIcon, AlertCircle, Loader2, Tag, FileText, Check, Edit3 } from 'lucide-react'
 import { GarmentService } from '../../../services/garmentService'
 import type { GarmentDetails } from '../../../types/garment'
 import { useAuth } from '../../../contexts/AuthContext'

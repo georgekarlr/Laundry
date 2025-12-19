@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Customer, CreditLedgerEntry, OrderHistoryItem, CustomerService } from '../../services/customerService'
-import { User, Phone, Mail, Calendar, X, DollarSign, Package, CreditCard, History, AlertCircle } from 'lucide-react'
+import { Customer, OrderHistoryItem, CustomerService } from '../../services/customerService'
+import { Phone, Mail, Calendar, X, Package, History, AlertCircle, Edit3, Hash } from 'lucide-react'
 import LoadingSpinner from '../LoadingSpinner'
 
 interface CustomerDetailProps {
@@ -10,27 +10,13 @@ interface CustomerDetailProps {
 }
 
 const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEdit }) => {
-  const [ledger, setLedger] = useState<CreditLedgerEntry[]>([])
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([])
-  const [loadingLedger, setLoadingLedger] = useState(true)
   const [loadingHistory, setLoadingHistory] = useState(true)
-  const [errorLedger, setErrorLedger] = useState('')
   const [errorHistory, setErrorHistory] = useState('')
 
   useEffect(() => {
     const fetchDetails = async () => {
-      // Fetch Credit Ledger
-      setLoadingLedger(true)
-      setErrorLedger('')
-      const ledgerResult = await CustomerService.getCustomerCreditLedger(customer.customer_id)
-      if (ledgerResult.success && ledgerResult.data) {
-        setLedger(ledgerResult.data)
-      } else {
-        setErrorLedger(ledgerResult.message)
-      }
-      setLoadingLedger(false)
-
-      // Fetch Order History
+      // Fetch Order History Only
       setLoadingHistory(true)
       setErrorHistory('')
       const historyResult = await CustomerService.getCustomerOrderHistory(customer.customer_id)
@@ -45,187 +31,149 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
     fetchDetails()
   }, [customer.customer_id])
 
+  // Helper for initials
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
-        <div className="inline-block w-full max-w-3xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
-          <div className="max-h-[80vh] overflow-y-auto p-6 space-y-6">
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-        <div className="flex items-center space-x-3">
-          <User className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-bold text-gray-900">Customer Details</h2>
-        </div>
-        <div className="flex items-center space-x-2">
-          {onEdit && (
-            <button
-              onClick={() => onEdit(customer)}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Edit
-            </button>
-          )}
-          <button
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        {/* Backdrop */}
+        <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
             onClick={onClose}
-            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="Close details"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+        />
 
-      {/* Customer Basic Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm font-medium text-gray-500">Name</p>
-          <p className="text-lg font-semibold text-gray-900">{customer.customer_name}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Phone</p>
-          <p className="text-lg text-gray-900 flex items-center space-x-1">
-            <Phone className="h-4 w-4 text-gray-400" />
-            <span>{customer.customer_phone_number}</span>
-          </p>
-        </div>
-        {customer.customer_email && (
-          <div>
-            <p className="text-sm font-medium text-gray-500">Email</p>
-            <p className="text-lg text-gray-900 flex items-center space-x-1">
-              <Mail className="h-4 w-4 text-gray-400" />
-              <span>{customer.customer_email}</span>
-            </p>
-          </div>
-        )}
-        <div>
-          <p className="text-sm font-medium text-gray-500">Member Since</p>
-          <p className="text-lg text-gray-900 flex items-center space-x-1">
-            <Calendar className="h-4 w-4 text-gray-400" />
-            <span>{new Date(customer.created_at).toLocaleDateString()}</span>
-          </p>
-        </div>
-      </div>
+        {/* Modal Container */}
+        <div className="relative w-full max-w-3xl bg-slate-50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-200">
 
-      {/* Credit Ledger */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <CreditCard className="h-5 w-5 text-purple-600" />
-          <h3 className="text-lg font-medium text-gray-900">Credit Ledger</h3>
-        </div>
-        {loadingLedger ? (
-          <LoadingSpinner />
-        ) : errorLedger ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-700">{errorLedger}</p>
+          {/* Header / Actions */}
+          <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-800">Customer Profile</h2>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wide">
+              {customer.customer_id.substring(0, 8)}
+            </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                  <button
+                      onClick={() => onEdit(customer)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:text-indigo-600 transition-colors"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" />
+                    Edit Profile
+                  </button>
+              )}
+              <button
+                  onClick={onClose}
+                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  aria-label="Close details"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        ) : ledger.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No credit ledger entries.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Notes
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {ledger.map((entry) => (
-                  <tr key={entry.ledger_id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(entry.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {entry.ledger_type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                      <span className={entry.ledger_type === 'DEPOSIT' || entry.ledger_type === 'LOYALTY_AWARD' ? 'text-green-600' : 'text-red-600'}>
-                        {entry.ledger_type === 'DEPOSIT' || entry.ledger_type === 'LOYALTY_AWARD' ? '+' : '-'}
-                        ${entry.ledger_amount.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {entry.ledger_notes || '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
 
-      {/* Order History */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <History className="h-5 w-5 text-orange-600" />
-          <h3 className="text-lg font-medium text-gray-900">Order History</h3>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto p-6 space-y-6">
+
+            {/* 1. Hero Profile Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                {/* Avatar */}
+                <div className="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 border-4 border-slate-50 shadow-sm">
+                  {getInitials(customer.customer_name)}
+                </div>
+
+                <div className="flex-1 space-y-4 w-full">
+                  <div>
+                    <h1 className="text-2xl font-extrabold text-slate-900">{customer.customer_name}</h1>
+                    <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>Member since {new Date(customer.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-sm text-slate-700">
+                      <Phone className="h-3.5 w-3.5 text-slate-400" />
+                      {customer.customer_phone_number}
+                    </div>
+                    {customer.customer_email && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-sm text-slate-700">
+                          <Mail className="h-3.5 w-3.5 text-slate-400" />
+                          {customer.customer_email}
+                        </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Order History Section (Full Width) */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <History className="h-4 w-4 text-orange-500" /> Recent Orders
+              </h3>
+
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[300px]">
+                {loadingHistory ? (
+                    <div className="flex items-center justify-center h-48"><LoadingSpinner /></div>
+                ) : errorHistory ? (
+                    <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 text-sm">
+                      <AlertCircle className="h-5 w-5" /> {errorHistory}
+                    </div>
+                ) : orderHistory.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                      <Package className="h-10 w-10 mb-2 opacity-20" />
+                      <p>No orders on record</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-slate-100">
+                        <thead className="bg-slate-50/50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Order ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Date</th>
+                          <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Status</th>
+                        </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                        {orderHistory.map((order) => (
+                            <tr key={order.order_id} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-1.5 text-sm font-mono text-slate-700">
+                                  <Hash className="h-3 w-3 text-slate-300" />
+                                  {order.order_id.substring(0, 8)}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-500">
+                                {new Date(order.created_at).toLocaleDateString(undefined, {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border ${
+                                order.order_status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    order.order_status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                        'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                              {order.order_status.replace(/_/g, ' ')}
+                            </span>
+                              </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                      </table>
+                    </div>
+                )}
+              </div>
+            </div>
+
+          </div>
         </div>
-        {loadingHistory ? (
-          <LoadingSpinner />
-        ) : errorHistory ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-700">{errorHistory}</p>
-          </div>
-        ) : orderHistory.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No order history found.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orderHistory.map((order) => (
-                  <tr key={order.order_id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                      {order.order_id.substring(0, 8)}...
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.order_status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                        order.order_status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {order.order_status.replace(/_/g, ' ')}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
-      </div>
-    </div>
-  </div>
-</div>
   )
 }
 
