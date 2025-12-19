@@ -1,5 +1,5 @@
 import React from 'react'
-import { Search, Filter, Hash } from 'lucide-react'
+import { Search, Filter, Hash, RotateCcw, ChevronDown, ListFilter, ArrowRight } from 'lucide-react'
 
 interface GarmentsFilterBarProps {
   searchTerm: string
@@ -15,100 +15,110 @@ interface GarmentsFilterBarProps {
 }
 
 const GarmentsFilterBar: React.FC<GarmentsFilterBarProps> = ({
-  searchTerm,
-  status,
-  orderId,
-  limit,
-  onSearchTermChange,
-  onStatusChange,
-  onOrderIdChange,
-  onLimitChange,
-  onApply,
-  onReset,
-}) => {
+                                                               searchTerm,
+                                                               status,
+                                                               orderId,
+                                                               limit,
+                                                               onSearchTermChange,
+                                                               onStatusChange,
+                                                               onOrderIdChange,
+                                                               onLimitChange,
+                                                               onApply,
+                                                               onReset,
+                                                             }) => {
   return (
-    <div className="bg-white shadow-sm rounded-lg p-4">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* Search */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search garments (tag, description, customer, etc.)..."
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
-          />
-        </div>
+      <div className="w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
 
-        {/* Status Filter */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Filter className="h-5 w-5 text-gray-400" />
+          {/* Search (Spans 4 columns on large screens) */}
+          <div className="lg:col-span-4 relative group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+            </div>
+            <input
+                type="text"
+                placeholder="Search by tag, description..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+                value={searchTerm}
+                onChange={(e) => onSearchTermChange(e.target.value)}
+            />
           </div>
-          <select
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-          >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="IN_WASH">In Wash</option>
-            <option value="IN_PRESSING">In Pressing</option>
-            <option value="READY">Ready</option>
-          </select>
-        </div>
 
-        {/* Order ID */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Hash className="h-5 w-5 text-gray-400" />
+          {/* Status Filter (Spans 2 columns) */}
+          <div className="lg:col-span-2 relative group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <ListFilter className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+            </div>
+            <select
+                value={status}
+                onChange={(e) => onStatusChange(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none appearance-none cursor-pointer text-slate-600 font-medium"
+            >
+              <option value="ALL">All Status</option>
+              <option value="PENDING">Pending</option>
+              <option value="IN_WASH">In Wash</option>
+              <option value="IN_PRESSING">In Pressing</option>
+              <option value="READY">Ready</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            </div>
           </div>
-          <input
-            type="text"
-            placeholder="Filter by Order ID (UUID)"
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-            value={orderId}
-            onChange={(e) => onOrderIdChange(e.target.value)}
-          />
-        </div>
 
-        {/* Limit */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Filter className="h-5 w-5 text-gray-400" />
+          {/* Order ID (Spans 2 columns) */}
+          <div className="lg:col-span-2 relative group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Hash className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+            </div>
+            <input
+                type="text"
+                placeholder="Order UUID..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-mono placeholder:font-sans"
+                value={orderId}
+                onChange={(e) => onOrderIdChange(e.target.value)}
+            />
           </div>
-          <select
-            value={limit}
-            onChange={(e) => onLimitChange(Number(e.target.value))}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-          >
-            <option value={10}>Show 10</option>
-            <option value={20}>Show 20</option>
-            <option value={50}>Show 50</option>
-            <option value={100}>Show 100</option>
-          </select>
-        </div>
 
-        {/* Actions */}
-        <div className="flex space-x-3">
-          <button
-            onClick={onReset}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
-          <button
-            onClick={onApply}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Apply
-          </button>
+          {/* Limit (Spans 2 columns) */}
+          <div className="lg:col-span-2 relative group">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Filter className="h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+            </div>
+            <select
+                value={limit}
+                onChange={(e) => onLimitChange(Number(e.target.value))}
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none appearance-none cursor-pointer text-slate-600 font-medium"
+            >
+              <option value={10}>10 per page</option>
+              <option value={20}>20 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            </div>
+          </div>
+
+          {/* Actions (Spans 2 columns) */}
+          <div className="lg:col-span-2 flex gap-2">
+            <button
+                onClick={onReset}
+                className="px-3 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                title="Reset Filters"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+            <button
+                onClick={onApply}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-200 hover:-translate-y-0.5 transition-all"
+            >
+              <span>Filter</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+
         </div>
       </div>
-    </div>
   )
 }
 

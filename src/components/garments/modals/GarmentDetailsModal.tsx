@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { X, Shirt, Calendar, User, Link as LinkIcon, AlertCircle, Loader2 } from 'lucide-react'
+import { X, Shirt, Calendar, User, Link as LinkIcon, AlertCircle, Loader2, Tag, FileText, Check, Edit3 } from 'lucide-react'
 import { GarmentService } from '../../../services/garmentService'
 import type { GarmentDetails } from '../../../types/garment'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -13,17 +13,18 @@ interface GarmentDetailsModalProps {
 }
 
 const statusColor = (status?: string | null) => {
+  const base = "px-2.5 py-0.5 rounded-full text-xs font-bold border "
   switch (status) {
     case 'READY':
-      return 'bg-green-100 text-green-800'
+      return `${base} bg-emerald-50 text-emerald-700 border-emerald-200`
     case 'IN_PRESSING':
-      return 'bg-yellow-100 text-yellow-800'
+      return `${base} bg-amber-50 text-amber-700 border-amber-200`
     case 'IN_WASH':
-      return 'bg-blue-100 text-blue-800'
+      return `${base} bg-blue-50 text-blue-700 border-blue-200`
     case 'PENDING':
-      return 'bg-gray-100 text-gray-800'
+      return `${base} bg-slate-50 text-slate-600 border-slate-200`
     default:
-      return 'bg-gray-100 text-gray-800'
+      return `${base} bg-slate-50 text-slate-600 border-slate-200`
   }
 }
 
@@ -122,132 +123,199 @@ const GarmentDetailsModal: React.FC<GarmentDetailsModalProps> = ({ isOpen, garme
     }
   }
 
-  const orderIdShort = useMemo(() => details?.order_id ? `${details.order_id.substring(0, 8)}...` : '' , [details?.order_id])
+  const orderIdShort = useMemo(() => details?.order_id ? `${details.order_id.substring(0, 8)}` : '' , [details?.order_id])
   const createdDate = useMemo(() => details?.garment_created_at ? new Date(details.garment_created_at).toLocaleString() : '' , [details?.garment_created_at])
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
-        <div className="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
-            <div className="flex items-center space-x-3">
-              <Shirt className="h-6 w-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900">Garment Details</h3>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        {/* Backdrop */}
+        <div
+            className="absolute inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity"
+            onClick={onClose}
+        />
+
+        {/* Modal Container */}
+        <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 fade-in duration-200">
+
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-10 sticky top-0">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Shirt className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 leading-none">Garment Details</h3>
+                <p className="text-xs text-slate-500 mt-1">View and edit garment information</p>
+              </div>
             </div>
             <button
-              onClick={onClose}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                onClick={onClose}
+                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-12 text-gray-600">
-              <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading details...
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          ) : details ? (
-            <div className="space-y-6">
-              {/* Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-xs text-gray-500 mb-1">Garment Tag</div>
-                  <div className="font-mono text-sm">{details.garment_tag_id || '—'}</div>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto p-6">
+            {loading ? (
+                <div className="flex flex-col items-center justify-center py-16 text-slate-500 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                  <span className="font-medium">Retrieving details...</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-xs text-gray-500 mb-1">Status</div>
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor(details.garment_status)}`}>
-                    {(details.garment_status || 'UNKNOWN').replace(/_/g, ' ')}
-                  </span>
+            ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-red-700">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  <p className="text-sm font-medium">{error}</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-xs text-gray-500 mb-1 flex items-center"><Calendar className="h-4 w-4 mr-1" /> Created</div>
-                  <div className="text-sm">{createdDate}</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-xs text-gray-500 mb-1 flex items-center"><User className="h-4 w-4 mr-1" /> Customer</div>
-                  <div className="text-sm">{details.customer_name}</div>
-                </div>
-              </div>
+            ) : details ? (
+                <div className="space-y-8">
 
-              {/* Order link */}
-              <div className="flex items-center justify-between bg-white border rounded-lg p-4">
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Order</div>
-                  <div className="text-sm font-mono">{orderIdShort}</div>
-                </div>
-                <Link to="/orders" className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                  <LinkIcon className="h-4 w-4 mr-1" /> View Orders
-                </Link>
-              </div>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Tag */}
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-2 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <Tag className="h-3.5 w-3.5" /> Garment Tag
+                      </div>
+                      <div className="font-mono text-base font-bold text-slate-900">
+                        {details.garment_tag_id || '—'}
+                      </div>
+                    </div>
 
-              {/* Description editor */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={2}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter description"
-                />
-                {descError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mt-2 text-sm text-red-700 flex items-center"><AlertCircle className="h-4 w-4 mr-1" /> {descError}</div>
-                )}
-                {descSuccess && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-2 text-sm text-green-700">{descSuccess}</div>
-                )}
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={handleSaveDescription}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    disabled={savingDescription}
-                  >
-                    {savingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Description'}
-                  </button>
-                </div>
-              </div>
+                    {/* Status */}
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-2 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <Loader2 className="h-3.5 w-3.5" /> Current Status
+                      </div>
+                      <div>
+                    <span className={statusColor(details.garment_status)}>
+                      {(details.garment_status || 'UNKNOWN').replace(/_/g, ' ')}
+                    </span>
+                      </div>
+                    </div>
 
-              {/* Notes editor */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={4}
-                  value={notesText}
-                  onChange={(e) => setNotesText(e.target.value)}
-                  placeholder="Type notes here (e.g., 'Small tear on collar', 'Extra starch')"
-                />
-                <p className="text-xs text-gray-500 mt-1">Saved as JSONB with a "text" field for compatibility.</p>
-                {notesError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mt-2 text-sm text-red-700 flex items-center"><AlertCircle className="h-4 w-4 mr-1" /> {notesError}</div>
-                )}
-                {notesSuccess && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-2 mt-2 text-sm text-green-700">{notesSuccess}</div>
-                )}
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={handleSaveNotes}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                    disabled={savingNotes}
-                  >
-                    {savingNotes ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Notes'}
-                  </button>
+                    {/* Created Date */}
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-2 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <Calendar className="h-3.5 w-3.5" /> Intake Date
+                      </div>
+                      <div className="text-sm font-medium text-slate-900">{createdDate}</div>
+                    </div>
+
+                    {/* Customer */}
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-2 mb-2 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <User className="h-3.5 w-3.5" /> Customer
+                      </div>
+                      <div className="text-sm font-bold text-slate-900 truncate">{details.customer_name}</div>
+                    </div>
+                  </div>
+
+                  {/* Order Context Bar */}
+                  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between group hover:border-indigo-300 transition-colors">
+                    <div>
+                      <div className="text-xs text-slate-500 font-medium mb-0.5">Associated Order</div>
+                      <div className="text-sm font-mono font-bold text-slate-900">#{orderIdShort}</div>
+                    </div>
+                    <Link
+                        to="/orders"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors"
+                    >
+                      <LinkIcon className="h-3.5 w-3.5" />
+                      View Order
+                    </Link>
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-6 space-y-6">
+                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Update Information</h4>
+
+                    {/* Description Editor */}
+                    <div className="space-y-3">
+                      <label className="block text-sm font-bold text-slate-700">Description</label>
+                      <div className="relative group">
+                        <Edit3 className="absolute left-3 top-3 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <textarea
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-sm text-slate-900"
+                            rows={2}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="e.g. Blue silk shirt, delicate cycle"
+                        />
+                      </div>
+
+                      {/* Action Bar */}
+                      <div className="flex items-center justify-between min-h-[32px]">
+                        <div className="flex-1">
+                          {descError && (
+                              <span className="text-xs text-red-600 flex items-center gap-1 font-medium animate-in slide-in-from-left-2">
+                          <AlertCircle className="h-3 w-3" /> {descError}
+                        </span>
+                          )}
+                          {descSuccess && (
+                              <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium animate-in slide-in-from-left-2">
+                          <Check className="h-3 w-3" /> {descSuccess}
+                        </span>
+                          )}
+                        </div>
+                        <button
+                            onClick={handleSaveDescription}
+                            className="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-indigo-200"
+                            disabled={savingDescription}
+                        >
+                          {savingDescription ? <Loader2 className="h-3 w-3 animate-spin mx-auto" /> : 'Save Description'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Notes Editor */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-baseline">
+                        <label className="block text-sm font-bold text-slate-700">Condition Notes</label>
+                        <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 font-mono">JSONB Compatible</span>
+                      </div>
+                      <div className="relative group">
+                        <FileText className="absolute left-3 top-3 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <textarea
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-sm text-slate-900"
+                            rows={4}
+                            value={notesText}
+                            onChange={(e) => setNotesText(e.target.value)}
+                            placeholder="e.g. Stain on collar, missing button..."
+                        />
+                      </div>
+
+                      {/* Action Bar */}
+                      <div className="flex items-center justify-between min-h-[32px]">
+                        <div className="flex-1">
+                          {notesError && (
+                              <span className="text-xs text-red-600 flex items-center gap-1 font-medium animate-in slide-in-from-left-2">
+                          <AlertCircle className="h-3 w-3" /> {notesError}
+                        </span>
+                          )}
+                          {notesSuccess && (
+                              <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium animate-in slide-in-from-left-2">
+                          <Check className="h-3 w-3" /> {notesSuccess}
+                        </span>
+                          )}
+                        </div>
+                        <button
+                            onClick={handleSaveNotes}
+                            className="px-4 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-emerald-200"
+                            disabled={savingNotes}
+                        >
+                          {savingNotes ? <Loader2 className="h-3 w-3 animate-spin mx-auto" /> : 'Save Notes'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
   )
 }
 

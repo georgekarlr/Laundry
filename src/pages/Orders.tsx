@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { OrderService } from '../services/orderService'
 import { OrderListItem } from '../types/order'
 import OrderList from '../components/orders/OrderList'
 import OrderDetail from '../components/orders/OrderDetail'
-import { Search, Filter, AlertCircle } from 'lucide-react'
+import { Search, AlertCircle, X, RefreshCw, ListFilter } from 'lucide-react'
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<OrderListItem[]>([])
@@ -14,139 +14,185 @@ const Orders: React.FC = () => {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('ALL')
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
 
+  const isFiltered = searchTerm !== '' || orderStatusFilter !== 'ALL' || paymentStatusFilter !== 'ALL'
+
   const loadOrders = async () => {
     setLoading(true)
     setError('')
-    
     const result = await OrderService.searchOrders(searchTerm, orderStatusFilter, paymentStatusFilter)
-    
     if (result.success && result.data) {
       setOrders(result.data)
     } else {
       setError(result.message)
     }
-    
     setLoading(false)
   }
 
   useEffect(() => {
-    loadOrders()
+    const delayDebounceFn = setTimeout(() => {
+      loadOrders()
+    }, 300) // Debounce search to prevent excessive API calls
+    return () => clearTimeout(delayDebounceFn)
   }, [searchTerm, orderStatusFilter, paymentStatusFilter])
 
-  const handleSelectOrder = (orderId: string) => {
-    setSelectedOrderId(orderId)
-  }
-
-  const handleCloseDetail = () => {
-    setSelectedOrderId(null)
-    // Refresh orders list when closing detail view
-    loadOrders()
-  }
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value)
-  }
-
-  const handleOrderStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setOrderStatusFilter(event.target.value)
-  }
-
-  const handlePaymentStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setPaymentStatusFilter(event.target.value)
-  }
-
-  if (selectedOrderId) {
-    return (
-      <OrderDetail 
-        orderId={selectedOrderId} 
-        onClose={handleCloseDetail}
-      />
-    )
+  const resetFilters = () => {
+    setSearchTerm('')
+    setOrderStatusFilter('ALL')
+    setPaymentStatusFilter('ALL')
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          View and manage all customer orders.
-        </p>
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-700">{error}</p>
+        {/* 1. Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Orders</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {loading ? 'Updating...' : `Manage and track ${orders.length} orders`}
+            </p>
+          </div>
+          <button
+              onClick={loadOrders}
+              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
-      )}
 
-      {/* Filters Section */}
-      <div className="bg-white shadow-sm rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+        {/* 2. Error Message */}
+        {error && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-md flex items-start">
+              <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+              <div className="text-sm text-red-700">{error}</div>
             </div>
-            <input
-              type="text"
-              placeholder="Search orders by customer name..."
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
+        )}
+
+        {/* 3. Adaptive Filters Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+          <div className="p-4 md:p-6 bg-gray-50/50 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center text-sm font-semibold text-gray-700">
+              <ListFilter className="h-4 w-4 mr-2 text-blue-600" />
+              Filter & Search
+            </div>
+            {isFiltered && (
+                <button
+                    onClick={resetFilters}
+                    className="text-xs font-medium text-blue-600 hover:text-blue-800 underline transition-colors"
+                >
+                  Clear all filters
+                </button>
+            )}
           </div>
 
-          {/* Order Status Filter */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter className="h-5 w-5 text-gray-400" />
+          <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Search Box */}
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+              <input
+                  type="text"
+                  placeholder="Search by name or order #"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <select
-              value={orderStatusFilter}
-              onChange={handleOrderStatusChange}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-            >
-              <option value="ALL">All Order Status</option>
-              <option value="AWAITING_PROCESSING">Awaiting Processing</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="READY_FOR_PICKUP">Ready for Pickup</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-          </div>
 
-          {/* Payment Status Filter */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter className="h-5 w-5 text-gray-400" />
+            {/* Status Selects */}
+            <div className="flex gap-2">
+              <select
+                  value={orderStatusFilter}
+                  onChange={(e) => setOrderStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+              >
+                <option value="ALL">All Orders</option>
+                <option value="AWAITING_PROCESSING">Awaiting</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="READY_FOR_PICKUP">Ready</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+
+              <select
+                  value={paymentStatusFilter}
+                  onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer"
+              >
+                <option value="ALL">All Payments</option>
+                <option value="PENDING">Pending</option>
+                <option value="PAID">Paid</option>
+                <option value="REFUNDED">Refunded</option>
+              </select>
             </div>
-            <select
-              value={paymentStatusFilter}
-              onChange={handlePaymentStatusChange}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-            >
-              <option value="ALL">All Payment Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="PAID">Paid</option>
-              <option value="PARTIALLY_PAID">Partially Paid</option>
-              <option value="VOID">Void</option>
-              <option value="REFUNDED">Refunded</option>
-            </select>
           </div>
         </div>
-      </div>
 
-      {/* Orders List */}
-      <OrderList
-        orders={orders}
-        loading={loading}
-        error={error}
-        onSelectOrder={handleSelectOrder}
-      />
-    </div>
+        {/* 4. Orders Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[400px]">
+          {loading && orders.length === 0 ? (
+              /* Skeleton Loader */
+              <div className="p-8 space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-12 w-full bg-gray-100 animate-pulse rounded-md" />
+                ))}
+              </div>
+          ) : orders.length === 0 ? (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="bg-gray-100 p-4 rounded-full mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No orders found</h3>
+                <p className="text-sm text-gray-500 max-w-xs mt-1">Try adjusting your filters or search terms to find what you're looking for.</p>
+              </div>
+          ) : (
+              <OrderList
+                  orders={orders}
+                  loading={loading}
+                  onSelectOrder={setSelectedOrderId}
+              />
+          )}
+        </div>
+
+        {/* 5. Adaptive Modal (Slide-over on Mobile, Modal on Desktop) */}
+        {selectedOrderId && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              {/* Backdrop */}
+              <div
+                  className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
+                  onClick={() => setSelectedOrderId(null)}
+              />
+
+              {/* Modal Content */}
+              <div className="relative bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-4xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b bg-white sticky top-0 z-10">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Order Information</h2>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">ID: {selectedOrderId}</p>
+                  </div>
+                  <button
+                      onClick={() => setSelectedOrderId(null)}
+                      className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                {/* Scrollable Body */}
+                <div className="flex-1 overflow-y-auto bg-gray-50/30 p-4 sm:p-8">
+                  <OrderDetail
+                      orderId={selectedOrderId}
+                      onClose={() => {
+                        setSelectedOrderId(null);
+                        loadOrders();
+                      }}
+                  />
+                </div>
+              </div>
+            </div>
+        )}
+      </div>
   )
 }
 
