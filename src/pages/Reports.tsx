@@ -5,7 +5,7 @@ import ReportsFilterBar from '../components/reports/ReportsFilterBar'
 import ReportsTable from '../components/reports/ReportsTable'
 import ReportsChart from '../components/reports/ReportsChart'
 import ExportButtons from '../components/reports/ExportButtons'
-import { Receipt } from 'lucide-react'
+import { Receipt, BarChart3, Table as TableIcon, LineChart } from 'lucide-react'
 
 const defaultDates = () => {
   const end = new Date()
@@ -24,7 +24,7 @@ const Reports: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<
-    SalesSummaryRow | SalesByCategoryRow[] | RefundsDetailRow[] | TopSpendingCustomerRow[] | null
+      SalesSummaryRow | SalesByCategoryRow[] | RefundsDetailRow[] | TopSpendingCustomerRow[] | null
   >(null)
 
   const generate = useCallback(async () => {
@@ -90,49 +90,85 @@ const Reports: React.FC = () => {
   }, [reportType, startDate, endDate])
 
   return (
-    <div className="space-y-4">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-            <Receipt className="h-5 w-5 text-blue-700" />
+      <div className="min-h-screen bg-slate-50/50 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 pb-20">
+        <div className="max-w-7xl mx-auto space-y-8">
+
+          {/* Page header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-200 hidden sm:block">
+                <Receipt className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Financial Reports</h2>
+                <p className="mt-1 text-sm text-slate-500 font-medium">
+                  Analyze performance metrics, sales trends, and customer insights.
+                </p>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <ExportButtons filenameBase={fileBase} data={data as any} />
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Financial Reports</h2>
-            <p className="text-sm text-gray-600">Generate tables and charts for a selected date range.</p>
+
+          {/* Filters Section */}
+          <div className="relative z-10">
+            <ReportsFilterBar
+                reportType={reportType}
+                startDate={startDate}
+                endDate={endDate}
+                limit={limit}
+                onReportTypeChange={setReportType}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onLimitChange={setLimit}
+                onApply={generate}
+                onReset={() => {
+                  const { start, end } = defaultDates()
+                  setReportType('SALES_SUMMARY')
+                  setStartDate(start)
+                  setEndDate(end)
+                  setLimit(10)
+                  setError(null)
+                  setData(null)
+                }}
+            />
+          </div>
+
+          {/* Analytics Grid */}
+          <div className="space-y-8">
+
+            {/* Chart Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-slate-400" />
+                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Visual Analysis</h3>
+              </div>
+              <div className="p-6">
+                <ReportsChart key={reportType + '-chart'} reportType={reportType} data={data as any} />
+              </div>
+            </div>
+
+            {/* Table Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                <TableIcon className="h-4 w-4 text-slate-400" />
+                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Detailed Data</h3>
+              </div>
+              <div className="p-0">
+                <ReportsTable
+                    key={reportType + '-table'}
+                    reportType={reportType}
+                    data={data as any}
+                    loading={loading}
+                    error={error}
+                />
+              </div>
+            </div>
+
           </div>
         </div>
-        <ExportButtons filenameBase={fileBase} data={data as any} />
       </div>
-
-      {/* Filters */}
-      <ReportsFilterBar
-        reportType={reportType}
-        startDate={startDate}
-        endDate={endDate}
-        limit={limit}
-        onReportTypeChange={setReportType}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-        onLimitChange={setLimit}
-        onApply={generate}
-        onReset={() => {
-          const { start, end } = defaultDates()
-          setReportType('SALES_SUMMARY')
-          setStartDate(start)
-          setEndDate(end)
-          setLimit(10)
-          setError(null)
-          setData(null)
-        }}
-      />
-
-      {/* Chart */}
-      <ReportsChart key={reportType + '-chart'} reportType={reportType} data={data as any} />
-
-      {/* Table */}
-      <ReportsTable key={reportType + '-table'} reportType={reportType} data={data as any} loading={loading} error={error} />
-    </div>
   )
 }
 
