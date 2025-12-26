@@ -11,12 +11,12 @@ interface CancelOrderModalProps {
 }
 
 const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  orderId,
-  personName,
-}) => {
+                                                             isOpen,
+                                                             onClose,
+                                                             onSuccess,
+                                                             orderId,
+                                                             personName,
+                                                           }) => {
   const [reason, setReason] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -34,7 +34,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
     try {
       const result = await OrderService.cancelOrder(orderId, reason.trim(), personName)
-      
+
       if (result.success) {
         onSuccess('Order cancelled successfully')
         onClose()
@@ -51,77 +51,112 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
-        <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
-            <div className="flex items-center space-x-3">
-              <XIcon className="h-6 w-6 text-red-600" />
-              <h3 className="text-lg font-medium text-gray-900">Cancel Order</h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              <XIcon className="h-5 w-5" />
-            </button>
-          </div>
+      <>
+        {/* LAYER 1: The Backdrop
+          - Fixed position, Lower Z-index (40)
+          - Handles Blur and Color (Dimming)
+      */}
+        <div
+            className="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+            onClick={onClose}
+            aria-hidden="true"
+        />
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
+        {/* LAYER 2: The Scrollable Container
+          - Fixed position, Highest Z-index (50)
+          - Handles centering the modal
+      */}
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
 
-          <div className="mb-4">
-            <p className="text-sm text-gray-600">
-              Are you sure you want to cancel this order? This action cannot be undone.
-            </p>
-          </div>
+            {/* LAYER 3: The Modal Panel
+              - Relative position (sits strictly ON TOP of backdrop)
+              - White background, Shadow-2xl, Red Theme accents
+          */}
+            <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
-                Cancellation Reason *
-              </label>
-              <textarea
-                id="reason"
-                rows={3}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Please provide a reason for cancelling this order..."
-                required
-              />
-            </div>
+              {/* Header Section */}
+              <div className="flex items-center justify-between border-b border-gray-100 bg-red-50/50 px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 leading-6">Cancel Order</h3>
+                    <p className="text-xs text-gray-500">Order ID: #{orderId.slice(0, 8)}...</p>
+                  </div>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="rounded-full p-2 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
 
-            <div className="flex space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                disabled={loading}
-              >
-                Keep Order
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
-                ) : (
-                  'Cancel Order'
+              {/* Body Section */}
+              <div className="px-6 py-6">
+                {error && (
+                    <div className="mb-6 flex items-start gap-3 rounded-lg bg-red-50 p-4 border border-red-100">
+                      <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-red-700">{error}</div>
+                    </div>
                 )}
-              </button>
+
+                {/* Warning Banner */}
+                <div className="mb-6 rounded-lg bg-gray-50 p-4 border border-gray-100">
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    <span className="font-semibold text-gray-900">Warning:</span> Are you sure you want to cancel this order? This action cannot be undone and will stop all processing immediately.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
+                      Cancellation Reason <span className="text-red-600">*</span>
+                    </label>
+                    <textarea
+                        id="reason"
+                        rows={3}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        className="block w-full rounded-lg border border-gray-300 py-3 px-4 text-gray-900 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20 sm:text-sm transition-shadow resize-none"
+                        placeholder="Please explain why this order is being cancelled..."
+                        required
+                    />
+                  </div>
+
+                  {/* Footer Buttons */}
+                  <div className="mt-8 flex gap-3 pt-2">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                        disabled={loading}
+                    >
+                      Keep Order
+                    </button>
+                    <button
+                        type="submit"
+                        className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        disabled={loading}
+                    >
+                      {loading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            <span>Cancelling...</span>
+                          </div>
+                      ) : (
+                          'Cancel Order'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
+      </>
   )
 }
 
