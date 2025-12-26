@@ -187,6 +187,7 @@ const Orders: React.FC = () => {
                         setSelectedOrderId(null);
                         loadOrders();
                       }}
+                      onRefresh={loadOrders}
                   />
                 </div>
               </div>

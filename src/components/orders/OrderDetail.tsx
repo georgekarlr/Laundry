@@ -15,9 +15,10 @@ import ProcessRefundModal from './modals/ProcessRefundModal'
 interface OrderDetailProps {
   orderId: string
   onClose: () => void
+  onRefresh?: () => void
 }
 
-const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
+const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose, onRefresh }) => {
   // ... (Logic remains identical)
   const { persona } = useAuth()
   const [order, setOrder] = useState<OrderDetailType | null>(null)
@@ -49,6 +50,7 @@ const OrderDetail: React.FC<OrderDetailProps> = ({ orderId, onClose }) => {
   const handleActionSuccess = (message: string) => {
     setSuccess(message)
     loadOrderDetails()
+    if (onRefresh) onRefresh()
     setTimeout(() => setSuccess(''), 5000)
   }
 
